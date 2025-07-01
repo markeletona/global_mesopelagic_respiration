@@ -3,7 +3,7 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under r
 
 ### Data availability
 The source data is publicly available. A list of
--  **GLODAPv2 (main dataset)** [TEST](https://glodap.info/index.php/merged-and-adjusted-data-product-v2-2023/)
+-  **GLODAPv2 (main dataset)** [Link](https://glodap.info/index.php/merged-and-adjusted-data-product-v2-2023/)
 -  Hansell et al. (2021) (DOM): https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.nodc:0227166
 -  Atmospheric histories of CFC-11, CFC-12, SF6: https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.nodc:0164584
 -  NPP: http://orca.science.oregonstate.edu/npp_products.php
