@@ -1,5 +1,8 @@
 # global_mesopelagic_respiration
-Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under review).
+Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under review). Steps:
+
+1. Install the conda environment specified in the `.yml` file ('oceanicu.yml`). If you need help with this, see [this](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
+2. Open the project with Spyder and execute the `master.py` script (a very minor edit is required to download the POC data, see details in file).
 
 ### Data availability
 The source data for this work is publicly available:
