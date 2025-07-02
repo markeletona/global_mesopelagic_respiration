@@ -22,6 +22,6 @@ The results produced in this work are available at:
 
 ### Acknowledgments
 This work was funded by the European Union under grant agreement no. 101083922 (OceanICU).
-![Ocean-ICU_logo]([https://ocean-icu.eu/wp-content/uploads/elementor/thumbs/OceanICU_logo_1.4-2-q553agqz0l9ywwwpp5ahc57flyormim6r95wfhkao0.png](https://github.com/markeletona/global_mesopelagic_respiration/blob/main/OceanICU_logo_1.4.png))
+![Ocean-ICU_logo](https://github.com/markeletona/global_mesopelagic_respiration/blob/main/OceanICU_logo_1.4.png)
 
 
