@@ -12,7 +12,7 @@ The source data for this work are publicly available:
 -  [Atmospheric histories of CFC-11, CFC-12, SF6](https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.nodc:0164584).
 -  [NPP](http://orca.science.oregonstate.edu/npp_products.php).
 -  [WOA](https://www.ncei.noaa.gov/access/world-ocean-atlas-2023/bin/woa23.pl).
--  [POC](https://data.marine.copernicus.eu/product/MULTIOBS_GLO_BIO_BGC_3D_REP_015_010/description).
+-  [POC](https://data.marine.copernicus.eu/product/MULTIOBS_GLO_BIO_BGC_3D_REP_015_010/description). (Complementary data for potential future work, not used in the article)
 
 *Note: scripts to automatically download the source data are part of the code provided here.*
 
