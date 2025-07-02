@@ -6,7 +6,7 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under r
 3. Execute the `master.py` script (a very minor edit is required to download POC data, see details in file).
 
 ### Data availability
-The source data for this work is publicly available:
+The source data for this work are publicly available:
 -  [**GLODAPv2 (main dataset)**](https://glodap.info/index.php/merged-and-adjusted-data-product-v2-2023/).
 -  [Hansell et al. (2021) (DOM)](https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.nodc:0227166).
 -  [Atmospheric histories of CFC-11, CFC-12, SF6](https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.nodc:0164584).
@@ -22,4 +22,6 @@ The results produced in this work are available at:
 
 ### Acknowledgments
 This work was funded by the European Union under grant agreement no. 101083922 (OceanICU).
+![Ocean-ICU_logo](https://ocean-icu.eu/wp-content/uploads/elementor/thumbs/OceanICU_logo_1.4-2-q553agqz0l9ywwwpp5ahc57flyormim6r95wfhkao0.png)
+
 
