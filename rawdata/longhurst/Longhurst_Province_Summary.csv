@@ -1,0 +1,55 @@
+PROVCODE;PROVDESCR;Biome;productivity_gC_m2_d;prod_class;chl_mg_m2;chl_class;photic_depth_m;photic_class;mld_sigma_m;mld_class;temp_0_celsius;temp_50_celsius;temp_diff
+FKLD;Coastal - SW Atlantic Shelves Province;C;1.3;4;;;30;2;101;5;8.538;7.116;-1.422
+CHIL;Coastal - Chile-Peru Current Coastal Province;C;0.74;2;16;4;43;3;23;2;16.661;14.191;-2.47
+TASM;Westerlies - Tasman Sea Province;W;0.45;2;10;3;40;3;68;4;17.824;17.095;-0.729
+BRAZ;Coastal - Brazil Current Coastal Province;C;0.83;3;26;5;45;3;22;2;21.785;20.296;-1.489
+SATL;Trades - South Atlantic Gyral Province (SATG);T;0.21;1;2;1;64;5;44;3;21.661;20.839;-0.822
+EAFR;Coastal - E. Africa Coastal Province;C;0.52;2;3;1;50;4;35;2;24.039;22.782;-1.257
+AUSW;Coastal - Australia-Indonesia Coastal Province;C;0.55;2;5;2;47;3;43;3;23.449;22.635;-0.814
+AUSE;Coastal - East Australian Coastal Province;C;0.64;2;9;2;45;3;42;3;24.23;23.406;-0.824
+ISSG;Trades - Indian S. Subtropical Gyre Province;T;0.19;1;2;1;63;5;42;3;23.029;22.1;-0.929
+BENG;Coastal - Benguela Current Coastal Province;C;0.88;3;16;4;41;3;40;3;18.119;16.603;-1.516
+ARCH;Trades - Archipelagic Deep Basins Province;T;0.27;1;3;1;55;4;32;2;26.38;25.316;-1.064
+SUND;Coastal - Sunda-Arafura Shelves Province;C;0.9;3;13;3;39;2;16;1;28.456;27.364;-1.092
+GUIN;Coastal - Guinea Current Coastal Province;C;1.36;4;10;3;36;2;5;1;25.875;18.671;-7.204
+PEQD;Trades - Pacific Equatorial Divergence Province;T;0.31;1;6;2;56;4;33;2;26.006;24.372;-1.634
+MONS;Trades - Indian Monsoon Gyres Province;T;0.29;1;3;1;55;4;26;2;28.237;26.901;-1.336
+ETRA;Trades - Eastern Tropical Atlantic Province;T;0.43;2;6;2;45;3;20;2;26.155;21.465;-4.69
+CNRY;Coastal - Canary Coastal Province (EACB);C;2.01;5;35;5;29;1;28;2;21.192;18.044;-3.148
+GUIA;Coastal - Guianas Coastal Province;C;1.92;5;56;5;39;2;15;1;27.606;26.745;-0.861
+ARAB;Coastal - NW Arabian Upwelling Province;C;1.24;4;18;4;39;2;29;2;27.096;25.321;-1.775
+WTRA;Trades - Western Tropical Atlantic Province;T;0.36;1;4;1;49;3;27;2;27.208;25.706;-1.502
+KURO;Westerlies - Kuroshio Current Province;W;0.53;2;14;3;45;3;50;3;20.297;18.215;-2.082
+NECS;Coastal - NE Atlantic Shelves Province;C;2;5;;;22;1;28;2;10.081;7.786;-2.295
+NASE;Westerlies - N. Atlantic Subtropical Gyral Province (East) (STGE);W;0.33;1;4;1;55;4;61;4;19.623;18.453;-1.17
+PSAE;Westerlies - Pacific Subarctic Gyres Province (East);W;0.55;2;21;5;40;3;57;3;8.282;6.528;-1.754
+CHIN;Coastal - China Sea Coastal Province;C;1.7;5;33;5;31;2;20;2;19.708;17.077;-2.631
+INDE;Coastal - E. India Coastal Province;C;0.97;3;13;3;40;3;9;1;28.201;27.187;-1.014
+CAMR;Coastal - Central American Coastal Province;C;0.92;3;11;3;39;2;10;1;27.278;20.986;-6.292
+PNEC;Trades - N. Pacific Equatorial Countercurrent Province;T;0.29;1;4;1;53;4;23;2;27.562;24.25;-3.312
+REDS;Coastal - Red Sea, Persian Gulf Province;C;1.69;5;31;5;34;2;19;1;27.495;25.238;-2.257
+INDW;Coastal - W. India Coastal Province;C;1.01;3;11;3;39;2;16;1;27.866;25.939;-1.927
+CARB;Trades - Caribbean Province;T;0.52;2;7;2;44;3;23;2;26.941;25.844;-1.097
+NPTG;Trades - N. Pacific Tropical Gyre Province;T;0.16;1;1;1;69;5;44;3;23.709;22.722;-0.987
+NATR;Trades - N. Atlantic Tropical Gyral Province (TRPG);T;0.29;1;4;1;55;4;36;2;25.557;24.559;-0.998
+MEDI;Westerlies - Mediterranean Sea, Black Sea Province;W;0.59;2;7;2;35;2;38;2;18.999;15.195;-3.804
+CCAL;Coastal - California Upwelling Coastal Province;C;1.06;3;15;4;35;2;20;2;17.007;14.937;-2.07
+NWCS;Coastal - NW Atlantic Shelves Province;C;1.48;4;25;5;25;1;25;2;12.452;9.156;-3.296
+NASW;Westerlies - N. Atlantic Subtropical Gyral Province (West) (STGW);W;0.26;1;4;1;55;4;61;4;23.037;21.585;-1.452
+GFST;Westerlies - Gulf Stream Province;W;0.49;2;7;2;40;3;44;3;18.983;17.554;-1.429
+NADR;Westerlies - N. Atlantic Drift Province (WWDR);W;0.66;2;;;40;3;143;5;13.172;12.227;-0.945
+ALSK;Coastal - Alaska Downwelling Coastal Province;C;1.81;5;33;5;30;2;29;2;8.103;6.439;-1.664
+ARCT;Polar - Atlantic Arctic Province;P;1.33;4;34;5;44;3;193;5;4.423;3.85;-0.573
+SARC;Polar - Atlantic Subarctic Province;P;0.83;3;33;5;37;2;113;5;6.842;6.058;-0.784
+NEWZ;Coastal - New Zealand Coastal Province;C;0.85;3;16;4;40;3;108;5;12.236;11.51;-0.726
+SSTC;Westerlies - S. Subtropical Convergence Province;W;0.37;1;9;2;50;4;88;5;13.965;13.341;-0.624
+SPSG;Trades - S. Pacific Subtropical Gyre Province;T;0.24;1;3;1;63;5;49;3;22.828;22.104;-0.724
+PSAW;Westerlies - Pacific Subarctic Gyres Province (West);W;0.72;2;21;5;40;3;57;3;6.693;4.605;-2.088
+BERS;Polar - N. Pacific Epicontinental Province;P;2.33;5;35;5;26;1;41;3;4.58;2.008;-2.572
+NPPF;Westerlies - N. Pacific Polar Front Province;W;0.47;2;15;4;41;3;65;4;15.16;13.189;-1.971
+NPSW;Trades - N. Pacific Subtropical Gyre Province (West);T;0.3;1;1;1;69;5;44;3;25.863;24.72;-1.143
+ANTA;Polar - Antarctic Province;P;0.45;2;12;3;45;3;102;5;0.763;0.543;-0.22
+SANT;Westerlies - Subantarctic Province;W;0.33;1;13;3;50;4;153;5;7.541;7.306;-0.235
+WARM;Trades - W. Pacific Warm Pool Province;T;0.22;1;2;1;61;5;39;2;28.955;28.637;-0.318
+APLR;Polar - Austral Polar Province;P;1.09;3;28;5;30;2;53;3;-1.268;-1.49;-0.222
+BPLR;Polar - Boreal Polar Province (POLR);P;1.77;5;35;5;33;2;10;1;-1.006;-1.332;-0.326
