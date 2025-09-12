@@ -3,11 +3,11 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under r
 
 1. Install the conda environment specified in the `.yml` file (`oceanicu.yml`). Type the following command in terminal:
    
-```conda env create -f oceanicu.yml```
+   ```conda env create -f oceanicu.yml```
 
-If you need help, check [this](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
-3. Launch the Spyder IDE and then open the [project](https://docs.spyder-ide.org/current/panes/projects.html) from the the parent directory.
-4. Execute the `master.py` script (a very minor edit is required to download POC data, see details in file).
+   If you need help, check [this](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
+2. Launch the Spyder IDE and then open the [project](https://docs.spyder-ide.org/current/panes/projects.html) from the the parent directory.
+3. Execute the `master.py` script (a very minor edit is required to download POC data, see details in file).
 
 ### Data availability
 The source data for this work are publicly available:
