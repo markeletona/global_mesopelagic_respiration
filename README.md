@@ -1,7 +1,7 @@
 # global_mesopelagic_respiration
 Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under review). Steps:
 
-1. Install the conda environment specified in the `.yml` file (`oceanicu.yml`). Type the following command in terminal:
+1. Install the conda environment specified in the `.yml` file (`oceanicu.yml`). Type the following command in the terminal:
    
    ```conda env create -f oceanicu.yml```
 
