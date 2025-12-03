@@ -14,7 +14,7 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under r
    conda activate oceanicu
    ```
 2. Launch the Spyder IDE (type `spyder` in the terminal) and then open the [project](https://docs.spyder-ide.org/current/panes/projects.html) from the the parent directory.
-3. Make sure that in `Tools > Preferences > Working directory` the selected option is `The project ...`, and in `Tools > Preferences > Run` within the configuration for the `.py` extension the `Working directory settings` has `The current working directory` selected. Otherwise relative paths won't work.
+3. Make sure that in `Tools > Preferences > Working directory` the selected option is `The project ...`, and in `Tools > Preferences > Run` within the configuration for the `.py` extension the `Working directory settings` has `The current working directory` selected. Otherwise relative paths won't work. Note: this works for Spyder 6.1, might be different for previous versions.
 4. Execute the `master.py` script (a very minor edit is required to download POC data, see details in file).
 
 ### Data availability
