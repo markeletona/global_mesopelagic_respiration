@@ -14,7 +14,8 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under r
    conda activate oceanicu
    ```
 2. Launch the Spyder IDE (type `spyder` in the terminal) and then open the [project](https://docs.spyder-ide.org/current/panes/projects.html) from the the parent directory.
-3. Execute the `master.py` script (a very minor edit is required to download POC data, see details in file).
+3. Make sure that in `Preferences > Working directory` `The project ...` option is selected. Otherwise relative paths won't work.
+4. Execute the `master.py` script (a very minor edit is required to download POC data, see details in file).
 
 ### Data availability
 The source data for this work are publicly available:
