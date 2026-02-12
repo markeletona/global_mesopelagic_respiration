@@ -47,7 +47,7 @@ tb = tb.replace(-9999, np.nan)
 tb = tb.replace('-9999', np.nan)
 
 # Load our aOUR estimates too, for comparison
-fpath = 'deriveddata/hansell_glodap/global/o2_aou_doc_age_regressions.csv'
+fpath = 'deriveddata/hansell_glodap/global/OURs.csv'
 reg1 = pd.read_csv(fpath, sep=',')
 reg1 = reg1.replace(-9999, np.nan)
 
@@ -312,7 +312,7 @@ for i, v in enumerate(ocs):
     # Subset our aOURs, enforcing conditions
     idx = ((reg1.ocean==v.lower()) &
            (reg1.spvalue < pval_limit) &
-           (reg1.r2 > r2_limit) &
+           (reg1.r2_AN > r2_limit) &
            (reg1.slope >= 0) &
            (reg1.y_var=='AOU_RES'))
     reg1ss = reg1.loc[idx, :]
@@ -461,7 +461,7 @@ for i, v in enumerate(ocs):
     # Subset our aOURs, enforcing conditions
     idx = ((reg1.ocean==v.lower()) &
            (reg1.spvalue < pval_limit) &
-           (reg1.r2 > r2_limit) &
+           (reg1.r2_AN > r2_limit) &
            (reg1.slope >= 0) &
            (reg1.y_var=='AOU_RES'))
     reg1ss = reg1.loc[idx, :]
@@ -615,7 +615,7 @@ fr = .5
 # Subset data
 idx = ((reg1.ocean=='indian') &
        (reg1.spvalue < pval_limit) &
-       (reg1.r2 > r2_limit) &
+       (reg1.r2_AN > r2_limit) &
        (reg1.slope >= 0) &
        (reg1.y_var=='AOU_RES') &
        (reg1.x_tracer=='AGE_SF6_RES'))
