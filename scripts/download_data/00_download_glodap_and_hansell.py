@@ -13,20 +13,21 @@ https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0227166/
 
 #%% IMPORTS
 
+from pathlib import Path
 import urllib.request
-import os
+import urllib.error
+import socket
+import shutil
+import sys
 
 
 #%% SETUP
 
 # Create necessary directories
-dpath = 'rawdata/glodap/'
-if not os.path.exists(dpath):
-    os.makedirs(dpath)
-    
-dpath = 'rawdata/dom_hansell/'
-if not os.path.exists(dpath):
-    os.makedirs(dpath)
+glodap_dir = Path("rawdata") / "glodap"
+hansell_dir = Path("rawdata") / "dom_hansell"
+glodap_dir.mkdir(parents=True, exist_ok=True)
+hansell_dir.mkdir(parents=True, exist_ok=True)
 
 
 # When downloading, check whether file already exists to avoid unnecessarily 
@@ -41,44 +42,89 @@ force_download_and_overwrite = False
 
 # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
 
+# Set desired timeout of connections when downloading
+timeout_seconds = 100
+
+
+# Create function to download files
+def download_file(url: str, dest: Path, force: bool = False, timeout: int = 60):
+    """
+    Download `url` to `dest`.
+    - Streams in chunks to avoid loading whole file into memory.
+    - Uses a temporary .part file and atomically replaces the final file.
+    - Handles common exceptions (HTTPError, URLError, timeout).
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    if dest.exists() and not force:
+        print(f"Skipping existing file: {dest}")
+        return
+
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as resp:
+            # Optional: check HTTP status via resp.getcode()
+            code = getattr(resp, "getcode", lambda: None)()
+            if code is not None and code >= 400:
+                raise urllib.error.HTTPError(url, code, "HTTP error", hdrs=None, fp=None)
+
+            with tmp.open("wb") as out_f:
+                shutil.copyfileobj(resp, out_f)  # streams efficiently
+        tmp.replace(dest)
+        print(f"Downloaded: {dest}")
+    except urllib.error.HTTPError:
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
+        raise
+    except urllib.error.URLError:
+        # URLError wraps socket.timeout and other connection errors
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
+        raise
+    except socket.timeout:
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
+        raise
+
 
 #%% DOWNLOAD GLODAP
 
-# Set paths in server and local
-url = 'https://glodap.info/glodap_files/v2.2023/GLODAPv2.2023_Merged_Master_File.csv.zip'
-fpath_local = 'rawdata/glodap/GLODAPv2.2023_Merged_Master_File.csv.zip'
 
-# Download if does not exist, or if exists and forced to overwrite
-boo = ((os.path.exists(fpath_local) & force_download_and_overwrite) |
-       (not os.path.exists(fpath_local)))
-if boo:
-    # Download file from server
-    urllib.request.urlretrieve(url, fpath_local)
+try:
+    # Set paths in server and local
+    url = "https://glodap.info/glodap_files/v2.2023/GLODAPv2.2023_Merged_Master_File.csv.zip"
+    fpath_local = glodap_dir / "GLODAPv2.2023_Merged_Master_File.csv.zip"
+    download_file(url, fpath_local, force=force_download_and_overwrite, timeout=timeout_seconds)
 
+    # Ancillary files
+    url = "https://glodap.info/glodap_files/v2.2023/GLODAPv2.2023_EXPOCODES.txt"
+    fpath_local = glodap_dir / "GLODAPv2.2023_EXPOCODES.txt"
+    download_file(url, fpath_local, force=force_download_and_overwrite, timeout=timeout_seconds)
 
-## Ancillary files
+    url = "https://glodap.info/glodap_files/v2.2023/GLODAPv2.2023_DOIs.csv"
+    fpath_local = glodap_dir / "GLODAPv2.2023_DOIs.csv"
+    download_file(url, fpath_local, force=force_download_and_overwrite, timeout=timeout_seconds)
+except Exception as e:
+    print(f"Error downloading GLODAP files: {e}", file=sys.stderr)
+    
 
-url = 'https://glodap.info/glodap_files/v2.2023/GLODAPv2.2023_EXPOCODES.txt'
-fpath_local = 'rawdata/glodap/GLODAPv2.2023_EXPOCODES.txt'
-boo = ((os.path.exists(fpath_local) & force_download_and_overwrite) |
-       (not os.path.exists(fpath_local)))
-if boo: urllib.request.urlretrieve(url, fpath_local)
-
-url = 'https://glodap.info/glodap_files/v2.2023/GLODAPv2.2023_DOIs.csv'
-fpath_local = 'rawdata/glodap/GLODAPv2.2023_DOIs.csv' 
-boo = ((os.path.exists(fpath_local) & force_download_and_overwrite) |
-       (not os.path.exists(fpath_local)))
-if boo: urllib.request.urlretrieve(url, fpath_local)
 
 
 
 #%% DOWNLOAD HANSELL DOM
 
-# Set paths in server and local
-url = 'https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0227166/All_Basins_Data_Merged_Hansell_2022.xlsx'
-fpath_local = 'rawdata/dom_hansell/All_Basins_Data_Merged_Hansell_2022.xlsx'
-
-# Download if does not exist, or if exists and forced to overwrite
-boo = ((os.path.exists(fpath_local) & force_download_and_overwrite) |
-       (not os.path.exists(fpath_local)))
-if boo: urllib.request.urlretrieve(url, fpath_local)
+try:
+    url = "https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0227166/All_Basins_Data_Merged_Hansell_2022.xlsx"
+    fpath_local = hansell_dir / "All_Basins_Data_Merged_Hansell_2022.xlsx"
+    download_file(url, fpath_local, force=force_download_and_overwrite, timeout=timeout_seconds)
+except Exception as e:
+    print(f"Error downloading Hansell file: {e}", file=sys.stderr)

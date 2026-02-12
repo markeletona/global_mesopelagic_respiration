@@ -90,11 +90,14 @@ hns['CRUISE'] = hns['CRUISE'].replace("A22 (2021)       ", "A22 (2021)")
 
 # Replace -999 values with np.nan otherwise might have issues when deriving 
 # variables (see below):
-hns.replace(-999, np.nan, inplace=True)
+hns = hns.replace(-999, np.nan)
 
 
 # Most O2 values are given with 1 decimal of precission, so apply that to all
 hns['CTD_OXYGEN'] = round(hns['CTD_OXYGEN'], 1)
+
+# Also, a few O2 values close to 0 but negative. Set those to 0.
+hns.loc[hns['CTD_OXYGEN'] < 0, 'CTD_OXYGEN'] = 0
 
 
 #### Correct issues:
@@ -188,9 +191,9 @@ aflags = [2, 6]
 # Retain bottles with acceptable measurements in all the target variables (that
 # are found in the depth range of interest):
 # Variables that ALL must have acceptable values:
-hns = hns.assign(is_aflag1 = hns[var_flags1].isin(aflags).apply(all, axis=1))
+hns['is_aflag1'] = hns[var_flags1].isin(aflags).all(axis=1)
 # Variables from which AT LEAST ONE must have acceptable values:
-hns = hns.assign(is_aflag2 = hns[var_flags2].isin(aflags).apply(any, axis=1))
+hns['is_aflag2'] = hns[var_flags2].isin(aflags).any(axis=1)
 # Filter
 idx = ((hns['is_aflag1']) & 
        (hns['is_aflag2']))
@@ -213,7 +216,7 @@ print((hns_ss[var_names2]==-999).all(axis=None)) # none of the samples should ha
 
 #%%% LOAD POLYGONS
 
-fpath = pathlib.Path('deriveddata/ocean_wm_defs/').glob('*')
+fpath = pathlib.Path('deriveddata/ocean_wm_defs/').glob("*")
 dlist = [x for x in fpath if x.is_dir()]
 
 # List polygon files (they have .geojson extension), read and store them.
@@ -223,11 +226,11 @@ ocean_polys = {}
 for d in dlist:
     
     # Get path to polygon file
-    fpath = [*pathlib.Path(str(d) + "\\ocean").glob("*.geojson")][0]
+    ocean_dir = d / 'ocean'
+    fpath = list(ocean_dir.glob("*.geojson"))[0]
     
     # Read and store it
-    o = str(d).split("\\")[2]
-    ocean_polys[o] = from_geojson(fpath.read_text())
+    ocean_polys[d.name] = from_geojson(fpath.read_text())
 
 
 #%%% ASSIGNMENT
@@ -280,16 +283,19 @@ for d in dlist:
     for z in wm_depths:
         
         # Get wm paths at depth z and ocean d
-        flist = [*pathlib.Path(str(d) + "\\wms\\" + z).glob("*.geojson")]
+        wm_dir = d / 'wms' / z
+        flist = list(wm_dir.glob("*.geojson"))
         
         # Skip iteration if certain depth is absent (i.e. flist is empty)
+        # relevant for Pacific and Indian deep.
         if not flist: continue
         
         for f in flist:
             
             # Get wm name (accounts for when the name itself has underscore, 
-            # e.g. AAIW_P)            
-            w = "_".join(str(f).split("\\")[-1].split("_")[0:-1])
+            # e.g. AAIW_P)   
+            wname = f.stem
+            w = "_".join(wname.split("_")[:-1])
 
             # Load polygon
             wm_polys[w] = from_geojson(f.read_text())
@@ -360,7 +366,7 @@ hns_ss = hns_ss.merge(hns_ss2[['STID', 'LP']], on='STID')
 
 
 # Remove temporary variables/column
-hns_ss.drop('STID', axis=1, inplace=True)
+hns_ss = hns_ss.drop('STID', axis=1)
 del hns_ss2
 
 
