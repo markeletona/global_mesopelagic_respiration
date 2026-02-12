@@ -35,9 +35,7 @@ import matplotlib.pyplot as plt
 
 #%% READ DATA
 
-# Read all data as strings so that pandas does not have to guess the datatype
-# (it is a very large dataset and adds more time to the loading process).
-# Then we will transform to floats the columns that need to be transformed.
+# Read data
 fpath = 'rawdata/glodap/GLODAPv2.2023_Merged_Master_File.csv.zip'
 gv2 = pd.read_csv(fpath, sep=',', header=0, 
                   compression='zip',
@@ -62,24 +60,20 @@ vrs = ['G2expocode', 'G2cruise', 'G2station',
 gv2 = gv2.loc[:, vrs]
 
 # Replace bad values with nan:
-gv2.replace(-9999, np.nan, inplace=True)
+gv2 = gv2.replace(-9999, np.nan)
 
 # Convert to float the target columns:
 for f in [v for v in vrs if v not in ['G2expocode']]:
     
-    # Check first 1000 values to decide to convert to float or integer:
-    # (with this, if all tested values are nan -> column is converted to float 
-    #  as safeguard)
-    var_is_float = any([not float(i).is_integer() for i in gv2.loc[:1000, f]])
+    # coerce to numeric first
+    gv2[f] = pd.to_numeric(gv2[f], errors='coerce')
     
-    # Exception:
-    if f in ['G2station', 'G2depth']: var_is_float = True
-    
-    # Convert columns
-    if var_is_float:
-        gv2[f] = gv2[f].astype('float64')
+    # Set float or integer
+    if gv2[f].dropna().apply(float.is_integer).all():
+        # all integers (or empty) -> use nullable integer
+        gv2[f] = gv2[f].astype('Int64')
     else:
-        gv2[f] = gv2[f].astype('float64').astype('Int64')
+        gv2[f] = gv2[f].astype('float64')
     # Note that integer type *needs* to be 'Int64' (not int64, int or whatever)
     # to accept nans within it. 
     # https://pandas.pydata.org/docs/user_guide/integer_na.html#construction
@@ -87,7 +81,7 @@ for f in [v for v in vrs if v not in ['G2expocode']]:
 
 # Glodap has some longitude coords in [0 360]. Turn them into [-180, 180]
 # np.nanmax(gv2.G2longitude)
-over180 = gv2.G2longitude > 180
+over180 = gv2['G2longitude'] > 180
 gv2.loc[over180, 'G2longitude'] = gv2.loc[over180, 'G2longitude'] - 360
 
 
@@ -96,16 +90,18 @@ gv2.loc[over180, 'G2longitude'] = gv2.loc[over180, 'G2longitude'] - 360
 aflags = [0, 2]
 var_flags1 = ['G2oxygenf'] # all
 var_flags2 = ['G2cfc11f', 'G2cfc12f', 'G2sf6f'] # any
-gv2 = gv2.assign(is_aflag1 = gv2[var_flags1].isin(aflags).apply(all, axis=1))
-gv2 = gv2.assign(is_aflag2 = gv2[var_flags2].isin(aflags).apply(any, axis=1))
-gv2 = gv2[(gv2['is_aflag1']) & 
-          (gv2['is_aflag2'])]
-gv2.drop(columns=['is_aflag1', 'is_aflag2'], inplace=True)
+gv2['is_aflag1'] = gv2[var_flags1].isin(aflags).all(axis=1)
+gv2['is_aflag2'] = gv2[var_flags2].isin(aflags).any(axis=1)
+gv2 = gv2[(gv2['is_aflag1']) & (gv2['is_aflag2'])].drop(columns=['is_aflag1', 'is_aflag2'])
 
 
 # As with the Hansell dataset, many O2 values are given with 1 decimal of
 # precission, so harmonise everything
-gv2['G2oxygen'] = round(gv2['G2oxygen'], 1)
+gv2['G2oxygen'] = gv2['G2oxygen'].round(1)
+
+# Also, a few O2 values (e.g. in the Pacific OMZ) are very close to 0 but
+# negative. Set those to 0.
+gv2.loc[gv2['G2oxygen'] < 0, 'G2oxygen'] = 0
 
 
 #%% DERIVED VARIABLES
@@ -148,11 +144,11 @@ ocean_polys = {}
 for d in dlist:
     
     # Get path to polygon file
-    fpath = [*pathlib.Path(str(d) + "\\ocean").glob("*.geojson")][0]
+    ocean_dir = d / 'ocean'
+    fpath = list(ocean_dir.glob("*.geojson"))[0]
     
     # Read and store it
-    o = str(d).split("\\")[2]
-    ocean_polys[o] = from_geojson(fpath.read_text())
+    ocean_polys[d.name] = from_geojson(fpath.read_text())
 
 
 #%%% ASSIGNMENT
@@ -204,16 +200,19 @@ for d in dlist:
     for z in wm_depths:
         
         # Get wm paths at depth z and ocean d
-        flist = [*pathlib.Path(str(d) + "\\wms\\" + z).glob("*.geojson")]
+        wm_dir = d / 'wms' / z
+        flist = list(wm_dir.glob("*.geojson"))
         
         # Skip iteration if certain depth is absent (i.e. flist is empty)
+        # relevant for Pacific and Indian deep.
         if not flist: continue
         
         for f in flist:
             
             # Get wm name (accounts for when the name itself has underscore, 
-            # e.g. AAIW_P)            
-            w = "_".join(str(f).split("\\")[-1].split("_")[0:-1])
+            # e.g. AAIW_P)   
+            wname = f.stem
+            w = "_".join(wname.split("_")[:-1])
 
             # Load polygon
             wm_polys[w] = from_geojson(f.read_text())
@@ -272,7 +271,7 @@ gv2_stcoords = gv2.loc[~gv2.duplicated('STID'), colnames]
 
 
 #### Assign stations Longhurst provinces
-gv2_stcoords['G2lp'] = 'nan'
+gv2_stcoords['G2lp'] = pd.NA
 for ir, r in gv2_stcoords.iterrows():
     gv2_stcoords.loc[ir, 'G2lp'] = lh.find_longhurst(r['G2longitude'],
                                                      r['G2latitude'])
@@ -289,7 +288,7 @@ gv2 = gv2.merge(gv2_stcoords[['STID', 'G2lp']], on='STID')
 
 
 # Remove temporary variables/column
-gv2.drop('STID', axis=1, inplace=True)
+gv2 = gv2.drop('STID', axis=1)
 del gv2_stcoords, gv2_stcoords_not
 
 
