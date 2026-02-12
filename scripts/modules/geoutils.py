@@ -14,9 +14,10 @@ _______________________________________________________________________________
 """
 
 import numpy as np
-from shapely import geometry, GeometryCollection
-from shapely.ops import split
+from shapely.geometry import LineString, Polygon, MultiPolygon, GeometryCollection
+from shapely.ops import split, unary_union
 from shapely.affinity import translate
+from shapely.validation import make_valid
 
 
 # Load text files with coordiantes in lon, lat point pairs in columns
@@ -154,6 +155,37 @@ def shift_lon_180_180(coord_pair_list: list):
     return new_coord_pair_list
 
 
+def shift_lon_a(coord_pair_list: list, a=0):
+    """
+    Given a list of coordinates with the GeoJSON format 
+    ([[lon, lat], [lon, lat], ...]), convert longitudes from [-180, 180] into 
+    [a, a+360].
+
+    Parameters
+    ----------
+    coord_pair_list : list
+        List of coordinates with longitudes in the range [-180, 180].
+    a: float (or coercible to float)
+        New starting longitude. Defaults to 0.
+
+    Returns
+    -------
+    new_coord_pair_list : list
+        List of coordinates with longitudes converted into the range [a, a+360].
+
+    """
+    a = float(a)
+    
+    new_coord_pair_list = []
+    for i in range(len(coord_pair_list)):
+        ilon = coord_pair_list[i][0]
+        if ilon < a:
+            ilon = ilon + 360  
+        new_coord_pair_list.append([ilon, coord_pair_list[i][1]])      
+    return new_coord_pair_list
+
+
+
 def split_poly_in_antimeridian(boundary: list, meridian: float = 180,
                                shift_lon: bool = True,
                                output_type: str = "GeometryCollection"):
@@ -186,13 +218,13 @@ def split_poly_in_antimeridian(boundary: list, meridian: float = 180,
     """
     
     # Create linestring with meridian value (defaults to antimeridian)
-    split_meridian = geometry.LineString([[meridian, -90.0], [meridian, 90.0]])
+    split_meridian = LineString([[meridian, -90.0], [meridian, 90.0]])
     
     # Create polygon from boundary points (allowing shifted longitudes)
     if shift_lon:
-        p = geometry.Polygon(shift_lon_0_360(boundary))
+        p = Polygon(shift_lon_0_360(boundary))
     else:
-        p = geometry.Polygon(boundary)
+        p = Polygon(boundary)
         
     # Split polygon
     splitted_p = split(p, split_meridian)
@@ -217,6 +249,8 @@ def split_poly_in_antimeridian(boundary: list, meridian: float = 180,
                          "' is not a valid option for output_type.")
     
     return out
+
+
 
 
 # Points set manually for polygons can be relatively sparse, and when 
@@ -256,7 +290,7 @@ def interpolate_coords(coord_pair_list: list,
     
     # Shift longitudes to [0, 360] if requested
     if shift_lon:
-        shift_lon_0_360(coord_pair_list)
+        coord_pair_list = shift_lon_0_360(coord_pair_list)
         
     # Close boundary if necessary (start and end need to be the same point)
     if close & (not str(coord_pair_list[0])==str(coord_pair_list[-1])):
@@ -288,3 +322,132 @@ def interpolate_coords(coord_pair_list: list,
     new_coords = [[round(x, 6), round(y, 6)] for x, y in zip(newx, newy)]
     
     return new_coords
+
+
+
+def shift_polygon(p: Polygon, a: float = 0):
+    """
+    
+    Shifts an individual polygon from [-180, 180] coordinates to [a, a+360].
+    
+    Parameters
+    ----------
+    p
+        Input polygon.
+    a : float, optional
+        Start of new shifted coordinates. Resulting range will be [a, a+360]. 
+        The default is 0, i.e., [0, 360].
+
+    Returns
+    -------
+    new_shifted_poly : Polygon
+        Resulting shifted polygon.
+
+    """
+    
+    if not isinstance(p, Polygon):
+        raise TypeError(f"Expected Polygon, got {type(p).__name__}")
+    
+    # Get the coordiantes of the polygon boundary
+    xy = p.exterior.coords.xy
+    p_coords = [[xy[0][i], xy[1][i]] for i in range(len(xy[0]))]
+    
+    # Avoid points exactly at the new antimeridian
+    # Be aware of the side of the antimeridian in which the coords are
+    lon = [i[0] for i in p_coords]
+    lat = [i[1] for i in p_coords]
+    side = np.sign(np.median(np.array(lon) - a))
+    new_lon = [i + side * 0.0001 if i == a else i for i in lon]
+    new_p_coords = [[lon, lat] for lon, lat in zip(new_lon, lat)]
+    
+    # Shift coords
+    shifted_coords = shift_lon_a(new_p_coords, a=a)
+    
+    # Add extra bit so that coords close to 180 overlap from each side, so that
+    # the unary union joins them properly.
+    lon = [i[0] for i in shifted_coords]
+    lat = [i[1] for i in shifted_coords]
+    offset_up = [.11 if ((i<=180) & (i>179.9)) else 0 for i in lon]
+    offset_down = [-.11 if ((i>=180) & (i<180.1)) else 0 for i in lon]
+    lon_offset = [i + o for i, o in zip(lon, offset_up)]
+    lon_offset = [i + o for i, o in zip(lon_offset, offset_down)]
+    new_shifted_coords = [[lon, lat] for lon, lat in zip(lon_offset, lat)]
+    
+    # Convert back to polygon
+    new_shifted_poly = Polygon(new_shifted_coords)
+    
+    # In some edge cases "holes" of islands tend to create issues so workaround
+    # to fix that
+    if not new_shifted_poly.is_valid:
+        new_shifted_poly = make_valid(new_shifted_poly)
+    
+    return new_shifted_poly
+
+
+
+def shift_polygon_to_map(mp, a=0):
+    
+    """
+    Shift polygons to avoid the antimeridian split line showing up in the map.
+    The intended shift is that which moves the antimeridian to the edge of the 
+    map so that is no longer visible. This is most useful e.g. for maps of the 
+    Pacific, or global maps centered around the Pacific.
+    
+    Its intented input are MultiPolygon class objects (polygons splitted at the
+    antimeridian are effectively MultiPolygons), but also accepts 
+    GeometryCollection or simple Polygon, in the latter case it just returns 
+    them shifted.
+    
+    Internally uses shift_polygon().
+    """
+    
+    # If input is an individual polygon, coerce to MultiPolygon class so that
+    # the function code is generally applicable
+    if isinstance(mp, Polygon):
+        
+        mp = MultiPolygon([mp])
+    
+    if (isinstance(mp, MultiPolygon) | isinstance(mp, GeometryCollection)):
+        
+        shifted_polys = []
+        for p in mp.geoms:
+            
+            # Slipt polygon in new antimeridian (a).
+            # This is need for polygons that wrap around (at least most of) 
+            # the globe. Polygon coordinates maintain their order, so when
+            # shifthing them to the new range [a, a+360], they jump back/forth
+            # at the new antimeridian. As creating general code to reorder them
+            # is complicated, an easy workaround is to split the polygons by 
+            # the new antimeridian, shift coordinates of both sides, and then
+            # do a unary_union back together. If a polygon does not cross the 
+            # new antimeridian, the split just returns a single polygon, so 
+            # there is no issue.
+            
+            # Create linestring with meridian value
+            split_meridian = LineString([[a, -90.0], [a, 90.0]])
+            
+            # Split polygon
+            splitted_p = split(p, split_meridian)
+            
+            # Shift individual polygons
+            for sp in splitted_p.geoms:
+                
+                # Shift polygon
+                shifted_p = shift_polygon(sp, a=a)
+            
+                # Gather resulting polyons
+                shifted_polys.append(shifted_p)
+
+        # Join them to achieve new shifted polygon
+        try:
+            new_poly = unary_union(shifted_polys)
+            
+        except Exception as e:
+            # If union fails,
+            print(f"unary_union() failed: {e}.\n Returning list of individual polygons to assess.")
+            new_poly = shifted_polys
+    
+        return new_poly
+
+    else:
+        raise TypeError(f"Expected Polygon, MultiPolygon or GeometryCollection, got {type(mp).__name__}.")

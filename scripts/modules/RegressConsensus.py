@@ -22,7 +22,7 @@ _______________________________________________________________________________
 
 from scipy.special import fdtr, stdtr
 from scipy.stats import t as tdist
-from numpy import sign, isnan, Inf, var
+from numpy import sign, isnan, inf, var
 
 def RegressConsensusW(X, Y, Wx=.5, intercept=1):
     """
@@ -214,14 +214,14 @@ def RegressConsensusW(X, Y, Wx=.5, intercept=1):
     if intercept==1:
         # F statistic for regression
         if s2==0: # s2 can be 0 for perfect fits and Python cannot divide by 0
-            F = Inf
+            F = inf
         else:
             F = (RSS / (n - nu - 1)) / s2 
         # Significance probability for regression
         pval = 1 - fdtr(n - nu - 1, nu, F)
     else:
         if s2==0:
-            F = Inf
+            F = inf
         else:
             F = (RSS / (n - nu)) / s2
         pval = 1 - fdtr(n - nu, nu, F)
@@ -238,8 +238,8 @@ def RegressConsensusW(X, Y, Wx=.5, intercept=1):
     if intercept==1:
         # t values, tb = b/sb 
         # (perfect fits yield sb, sa = 0, avoid warning in 0 division)
-        tb = (b/sb if not sb==0 else Inf) # tb = b/sb
-        ta = (a/sa if not sa==0 else Inf) # ta = a/sa
+        tb = (b/sb if not sb==0 else inf) # tb = b/sb
+        ta = (a/sa if not sa==0 else inf) # ta = a/sa
         # p-values:
         pval_b = 2 * (1 - stdtr(nu, abs(tb))) # pval and pval_b should be the same
         pval_a = 2 * (1 - stdtr(nu, abs(ta)))
@@ -247,8 +247,8 @@ def RegressConsensusW(X, Y, Wx=.5, intercept=1):
         ci_b = tdist.ppf((1 - .05 / 2), nu) * sb
         ci_a = tdist.ppf((1 - .05 / 2), nu) * sa
     else:
-        tb = (b/sb if not sb==0 else Inf) # tb = b/sb
-        ta = Inf # for intercept==0, a=0, sa=0
+        tb = (b/sb if not sb==0 else inf) # tb = b/sb
+        ta = inf # for intercept==0, a=0, sa=0
         pval_b = 2 * (1 - stdtr(nu, abs(tb)))
         pval_a = 2 * (1 - stdtr(nu, abs(ta)))
         ci_b = tdist.ppf((1 - .05 / 2), nu) * sb
@@ -464,14 +464,14 @@ def RegressConsensus(X, Y, sX, sY, intercept=1):
     if intercept==1:
         # F statistic for regression
         if s2==0: # s2 can be 0 for perfect fits and Python cannot divide by 0
-            F = Inf
+            F = inf
         else:
             F = (RSS / (n - nu - 1)) / s2 
         # Significance probability for regression
         pval = 1 - fdtr(n - nu - 1, nu, F)
     else:
         if s2==0:
-            F = Inf
+            F = inf
         else:
             F = (RSS / (n - nu)) / s2
         pval = 1 - fdtr(n - nu, nu, F)
@@ -488,8 +488,8 @@ def RegressConsensus(X, Y, sX, sY, intercept=1):
     if intercept==1:
         # t values
         # (perfect fits yield sb, sa = 0, avoid warning in 0 division)
-        tb = (b/sb if not sb==0 else Inf) # tb = b/sb
-        ta = (a/sa if not sa==0 else Inf) # ta = a/sa
+        tb = (b/sb if not sb==0 else inf) # tb = b/sb
+        ta = (a/sa if not sa==0 else inf) # ta = a/sa
         # p-values:
         pval_b = 2 * (1 - stdtr(nu, tb)) # pval and pval_b should be the same
         pval_a = 2 * (1 - stdtr(nu, ta))
@@ -497,8 +497,8 @@ def RegressConsensus(X, Y, sX, sY, intercept=1):
         ci_b = tdist.ppf((1 - .05 / 2), nu) * sb
         ci_a = tdist.ppf((1 - .05 / 2), nu) * sa
     else:
-        tb = (b/sb if not sb==0 else Inf) # tb = b/sb
-        ta = Inf # for intercept==0, a=0, sa=0
+        tb = (b/sb if not sb==0 else inf) # tb = b/sb
+        ta = inf # for intercept==0, a=0, sa=0
         pval_b = 2 * (1 - stdtr(nu, tb))
         pval_a = 2 * (1 - stdtr(nu, ta))
         ci_b = tdist.ppf((1 - .05 / 2), nu) * sb

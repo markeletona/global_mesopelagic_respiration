@@ -7,6 +7,7 @@ Modified and updated by Markel Gómez Letona.
 """
 from queue import PriorityQueue
 from math import sqrt
+from shapely import Polygon, MultiPolygon
 
 SQRT2 = 1.414213562
 
@@ -21,6 +22,7 @@ def polylabel(polygon: list, precision: float = 1.0):
     polygon : list
         A list containing the polygon outline coordinates in GeoJSON format,
         that is: [[lon, lat], [lon, lat], [lon, lat],...].
+        Accepts
     precision : float, optional
         DESCRIPTION. The default is 1.0.
 
@@ -32,6 +34,30 @@ def polylabel(polygon: list, precision: float = 1.0):
         y coordinate of the resulting point.
 
     """
+    
+    # Get GeoJSON list of coordiantes if input is either a Polygon or MultiPolygon
+    is_not_list = (not isinstance(polygon, list))
+    if is_not_list and isinstance(polygon, Polygon):
+        
+        # Extract coordinates to geojson list
+        p_x, p_y = polygon.exterior.coords.xy
+        polygon = [[x, y] for x, y in zip(p_x, p_y)]
+        
+    elif is_not_list and isinstance(polygon, MultiPolygon):
+        
+        # If Multipolygon, consider the largest one
+        all_subpolys = [g for g in polygon.geoms]
+        all_subpolys.sort(key=lambda p: p.area, reverse=True)
+        polygon = all_subpolys[0]
+        
+        # Extract coordinates to geojson list
+        p_x, p_y = polygon.exterior.coords.xy
+        polygon = [[x, y] for x, y in zip(p_x, p_y)]
+        
+    elif is_not_list:
+        # Otherwise, do not accept input.
+        raise TypeError("Invalid input type: should be a list (of GeoJSON coords), Polygon or MultiPolygon.")    
+        
     
     min_x = float("inf")
     min_y = float("inf")
