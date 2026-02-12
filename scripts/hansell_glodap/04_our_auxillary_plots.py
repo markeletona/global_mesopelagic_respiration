@@ -30,7 +30,7 @@ import cartopy.feature as cfeature
 #%% LOAD DATA
 
 # OURs
-fpath = 'deriveddata/hansell_glodap/global/o2_aou_doc_age_regressions.csv'
+fpath = 'deriveddata/hansell_glodap/global/OURs.csv'
 reg = pd.read_csv(fpath, sep=',')
 
 
@@ -444,15 +444,15 @@ for v in ['NPP_EPPL', 'NPP_CBPM', 'B', 'CFLUX_EPPL', 'CFLUX_CBPM']:
                 # Consider pval, r2 and enforce sign for AOU/OXYGEN
                 if v=='AOU_RES':
                     boo = ((r.spvalue < pval_limit) & 
-                           (r.r2 > r2_limit) &
+                           (r.r2_AN > r2_limit) &
                            (r.slope >= 0))
                 elif v=='OXYGEN_RES':
                     boo = ((r.spvalue < pval_limit) & 
-                           (r.r2 > r2_limit) &
+                           (r.r2_AN > r2_limit) &
                            (r.slope <= 0))
                 else:
                     boo = ((r.spvalue < pval_limit) & 
-                           (r.r2 > r2_limit))
+                           (r.r2_AN > r2_limit))
                   
                 if boo:
                     
@@ -539,7 +539,7 @@ idx = ((reg.water_mass.str.contains('central')) &
        (reg.y_var=='AOU_RES') &
        (reg.x_tracer.isin(ages_res)) &
        (reg.spvalue < pval_limit) &
-       (reg.r2 > r2_limit) &
+       (reg.r2_AN > r2_limit) &
        (reg.slope >= 0))
 r_central = reg.loc[idx, :]
 
@@ -660,7 +660,7 @@ idx = ((reg.water_mass.str.contains('central')) &
        (reg.water_mass.str.contains('atlantic')) &
        (reg.LATITUDE > 5) & (reg.LATITUDE < 15) &
        (reg.spvalue < pval_limit) &
-       (reg.r2 > r2_limit) &
+       (reg.r2_AN > r2_limit) &
        (reg.slope >= 0))
 ss = reg.loc[idx, :]
 for a in ages_res:
@@ -675,7 +675,7 @@ idx = ((reg.water_mass.str.contains('central')) &
        # (reg.water_mass.str.contains('pacific')) &
        # (reg.LATITUDE > -10) & (reg.LATITUDE < 0) &
        (reg.spvalue < pval_limit) &
-       (reg.r2 > r2_limit) &
+       (reg.r2_AN > r2_limit) &
        (reg.slope >= 0))
 ss = reg.loc[idx, :]
 for a in ages_res:
@@ -686,14 +686,14 @@ for a in ages_res:
 idx = ((reg.water_mass.str.contains('central')) &
        (reg.y_var=='AOU_RES') &
        (reg.x_tracer.isin(ages_res)) &
-       (reg.water_mass.str.contains('IUW')) &
+       (reg.water_mass.str.contains('IEW')) &
        (reg.spvalue < pval_limit) &
-       (reg.r2 > r2_limit) &
+       (reg.r2_AN > r2_limit) &
        (reg.slope >= 0))
 ss = reg.loc[idx, :]
 for a in ages_res:
     
-    print("Indian central, IUW, " + a + " mean OUR: " + 
+    print("Indian central, IEW, " + a + " mean OUR: " + 
           str(round(np.nanmean(ss.slope[ss.x_tracer==a]), 1)))
     
     
@@ -1056,13 +1056,13 @@ idx = ((reg.water_mass.str.contains('LSW|UNADW|CDW')) &
        (reg.y_var=='AOU_RES') &
        (reg.x_tracer.isin(ages_res)) &
         # (reg.spvalue < pval_limit) &
-        # (reg.r2 > r2_limit) &
+        # (reg.r2_AN > r2_limit) &
         (reg.slope >= 0))
 r_deep = reg.loc[idx, :].copy()
 
 # Set =0 the slopes of regressions that do NOT meet any of the required criteria
 r_deep.loc[((r_deep.spvalue >= pval_limit) | 
-            (r_deep.r2 <= r2_limit)), 'slope'] = 0
+            (r_deep.r2_AN <= r2_limit)), 'slope'] = 0
 
 
 #%%% Latitudinal trends
@@ -1257,22 +1257,3 @@ fpath = ('figures/hansell_glodap/global/rates/vs_latitude/our_vs_doc_deep_atlant
 fig_our_vs_doc.savefig(fpath, format='svg', bbox_inches='tight', transparent=False)
 
 
-#%%% DOCUR: show some values
-
-idx = ((reg.water_mass.str.contains('SPMW|LSW|UNADW|CDW')) &
-       (reg.y_var=='DOC_RES') &
-       (reg.x_tracer.isin(ages_res)) &
-       (reg.spvalue < pval_limit) &
-       (reg.r2 > r2_limit))
-r_deep_docur = reg.loc[idx, :].copy()
-
-for w in r_deep_docur.water_mass.unique():
-    for a in ages_res:
-        
-        ss = r_deep_docur.loc[((r_deep_docur.water_mass==w) &
-                               (r_deep_docur.x_tracer==a))]
-        print(w.split(";")[2] + " -> " + a + " mean DOCUR: " + 
-              str(round(np.nanmean(ss.slope), 2)) +
-              " [" + str(round(np.min(ss.slope), 2)) + ", " +
-              str(round(np.max(ss.slope), 2)) + "] "
-              " (" + str(len(ss)) + ")")

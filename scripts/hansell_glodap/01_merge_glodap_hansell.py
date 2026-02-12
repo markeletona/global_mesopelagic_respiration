@@ -43,6 +43,12 @@ gv2 = pd.read_csv(fpath, sep=',', header=0, dtype={'G2expocode': str,
 gv2 = gv2.replace(-9999, np.nan)
 hns = hns.replace(-9999, np.nan)
 
+# Convert POC3D from mg/m^3 to umol/L
+gv2['G2poc3d'] = gv2['G2poc3d'] / 1000 / 1000 / 12.011 * 10**6
+hns['POC3D'] = hns['POC3D'] / 1000 / 1000 / 12.011 * 10**6
+
+
+
 # In Hansell's DOC, replace all flag values NOT 2|6 to 9 (and their values to
 # NaN). (i.e., to make it easier to NOT consider unacceptable flags like 
 # 1, 3, 4, 5)
@@ -373,10 +379,66 @@ merged_tbl_f_summary['ndoc'] - ndoc_gv2_f
 #%%% Filter to keep only samples within a water mass
 
 idx = ~(merged_tbl_f.WATER_MASS=="NO_WATER_MASS")
-merged_tbl_f_wm = merged_tbl_f.loc[idx, :]
+merged_tbl_f_wm = merged_tbl_f.loc[idx, :].copy()
 
 merged_tbl_f_wm_summary = summary_values(merged_tbl_f_wm)
 
+
+#%% ADD UNCERTAINTY
+
+# Add columns with uncertainty of measurements / estimates
+
+# GLODAP paper reports uncertainty of 0.005 for salinity, and 1% for oxygen.
+# They don't provide error for temperature, presumably because it is very low.
+# Alvarez et al. 2014 set 0.04 for temperature.
+u_S = .005 # SALINITY uncert. as value
+u_T = .04  # TEMPERATURE uncert. as value
+u_O = .01  # OXYGEN uncert. as percentage
+
+# AOU is harder, because the saturation state of waters when sinking during
+# formation varies, and is usually not in equilibrium with the atmosphere.
+# However, there are few studies that directly study this.
+# - Wolf et al. (2018) found undersaturation of -6--7% during the formation of 
+# the LSW for water sinking below 800 m.
+# - Ito et al. (2004) modelling results that show values close to 100 % 
+# saturation for most the of surface waters of the global ocean. For instance, 
+# Stanley et al. (2012) also cite saturations of ~99-101% at BATS (subtropical 
+# gyre). Undersaturation is present in water formation areas of the North 
+# Atlantic and, specially, Southern Ocean, where undersaturation of 50-70 uM 
+# can be reached (80-85%), e.g. in the Wedell Sea.
+# This means that intermediate and deep water will be more affected by this,
+# whereas the uncertainty for central water masses will be small. We will 
+# parameterise this based on temperature (ranges).
+def u_AOU(t):
+    # Based on temperature, as overall in deep water formation areas uncert.
+    # is higher, but for central waters not
+    if (t >= 9):
+        return .01 # ± -> 2%
+    elif (t >= 5) & (t < 9):
+        return .025 # ± -> 5%
+    else:
+        return .05 # ± -> 10%
+
+
+# Add uncertainty columns
+merged_tbl_f_wm['PT_U'] = u_T
+merged_tbl_f_wm['CTD_SALINITY_U'] = u_S
+merged_tbl_f_wm['OXYGEN_U'] = merged_tbl_f_wm['OXYGEN'] * u_O 
+merged_tbl_f_wm['AOU_U'] = abs(merged_tbl_f_wm['AOU']) * [u_AOU(t) for t in merged_tbl_f_wm['PT']]
+
+
+# Reorder columns so that uncertainties are next to their variables
+cols = ['EXPOCODE', 'CRUISE', 'STATION', 'BOTTLE', 'DATE', 'LATITUDE',
+        'LONGITUDE', 'OCEAN', 'WATER_MASS', 'LP', 'CTD_PRESSURE', 'PT', 'PT_U',
+        'CTD_SALINITY', 'CTD_SALINITY_U', 'SIGMA0', 'SIGMA1',
+        'OXYGEN', 'OXYGEN_U', 'OXYGEN_FLAG_W', 
+        'CFC_11', 'CFC_11_FLAG_W', 'CFC_12', 'CFC_12_FLAG_W', 'SF6', 'SF6_FLAG_W', 
+        'DOC', 'DOC_FLAG_W', 'TDN', 'TDN_FLAG_W', 'NITRATE', 'NITRATE_FLAG_W',
+        'NITRITE', 'NITRITE_FLAG_W', 'PHOSPHATE', 'PHOSPHATE_FLAG_W',
+        'SILICIC_ACID', 'SILICIC_ACID_FLAG_W', 'CHLOROPHYLL_A',
+        'CHLOROPHYLL_A_FLAG_W', 'AOU', 'AOU_U', 
+        'NPP_EPPL', 'NPP_CBPM', 'B', 'POC3D']
+merged_tbl_f_wm = merged_tbl_f_wm.loc[:, cols]
 
 
 #%% EXPORT

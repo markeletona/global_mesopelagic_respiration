@@ -4,14 +4,14 @@ Created on Fri Jul  7 10:24:19 2023
 
 @author: Markel Gómez Letona
 
-Estimate tracer-derived ages of samples based on the measured CFC-11, CFC-12 
-and SF6 concentrations.
+Estimate tracer ages of samples based on the measured CFC-11, CFC-12 and SF6 
+concentrations.
 
 Note that measured concentrations from the Hansell and GLODAP datasets are 
 expressed in pmol/kg (CFC-11, CFC-12) and fmol/kg (SF6).
 
-Fine (2011)* describes that to estimate tracer-derived ages, the tracer partial
-pressure (pCFC) needs to be calculated as follows:
+Fine (2011)* describes that to estimate trace ages, the tracer partial pressure 
+(pCFC) needs to be calculated as follows:
     
     pCFC = C/F(T,S)
     
@@ -70,8 +70,8 @@ is equal to its mole fraction (x_i, aka mixing ratio), since:
 This is noteworthy if atmospheric values are given in terms of mixing ratios.
     
 The obtained date is then subtracted from the date the seawater sample was 
-collected, the diffence between dates gives an average age for the water 
-parcel.
+collected, the diffence between dates gives the apparent average age for the 
+water parcel.
 
 Nonetheless, not all tracers are equally accurate to determine ages across all
 time periods. As Tanhua et al. (2004)‡ show (see their Fig. 5):
@@ -157,9 +157,9 @@ atm = pd.read_csv(fpath, sep=',', header=None, names=atm_hdr2, skiprows=3)
 
 #%% DATA HANDLING
 
-# Replace missing/bad values (-9999) with nan:
-df.replace(-9999, np.nan, inplace=True)
 
+# Replace missing/bad values (-9999) with nan:
+df = df.replace(-9999, np.nan)
 
 # Create a column where we convert the DATE column to decimal year:
 df['YEAR_SAMPLE'] = np.nan
@@ -258,6 +258,7 @@ fpath = 'figures/tracers_atmosphere/atmospheric_history_nh_cfc11_cfc12_sf6.svg'
 fig_atm.savefig(fpath, format='svg', bbox_inches='tight', facecolor=None)
 
 
+
 #%%% RATIOS
 
 fig_atmr, ax_atmr = plt.subplots(figsize=(15*cm, 10*cm))
@@ -321,26 +322,26 @@ b1 = -0.146531
 b2 = 0.093621
 b3 = -0.0160693
 
-df['pCFC11'] = np.NaN # pre-allocate space
+df['pCFC11'] = np.nan # pre-allocate space
 for index, row in df.iterrows():
     # Get potential temperature and salinity:
     T = row['PT'] + 273.15
     S = row['CTD_SALINITY']
-    if S == -999: S = np.NaN # few instances have no salinity
+    if S == -999: S = np.nan # few instances have no salinity
     # Estimate solubility:
     F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + a4*(T/100)**2 + S*(b1 + b2*(T/100) + b3*(T/100)**2))
     # Estimate and store partial pressure:
     df.at[index, 'pCFC11'] = round(((row['CFC_11']/10**12)/F)*10**12, 2) # /10**12: to convert pmol/kg -> mol/kg | *10**12: to convert result to parts per trillion, the usual units
     
 # Preserve values only if the measurement had a valid flag (set NaN otherwise)
-# (the dataset was filtered to keep samples where either one of the three trace
+# (the dataset was filtered to keep samples where either one of the three tracer
 #  gases had a valid value (flags 2, 6), so specific samples might still carry
 #  dubious or erroneous measurements (3, 4) that are not necessarily NaN, 
 #  because one of the other gases in the sample had a valid measurement)
 #  (0 is included for Glodap flags -> interpolated or calculated; although
 #   apparently there are none for tracer gases)
 idx = ~df['CFC_11_FLAG_W'].isin([0, 2, 6]) # samples with NO acceptable flag
-df.loc[idx, 'pCFC11'] = np.NaN # revert to NaN any value that has not valid flag
+df.loc[idx, 'pCFC11'] = np.nan # revert to NaN any value that has not valid flag
 
     
 ## CFC-12:
@@ -353,16 +354,16 @@ b1 = -0.147718
 b2 = 0.093175
 b3 = -0.0157340
 
-df['pCFC12'] = np.NaN
+df['pCFC12'] = np.nan
 for index, row in df.iterrows():
     T = row['PT'] + 273.15
     S = row['CTD_SALINITY']
-    if S == -999: S = np.NaN
+    if S == -999: S = np.nan
     F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + a4*(T/100)**2 + S*(b1 + b2*(T/100) + b3*(T/100)**2))
     df.at[index, 'pCFC12'] = round(((row['CFC_12']/10**12)/F)*10**12, 2)
 
 idx = ~df['CFC_12_FLAG_W'].isin([0, 2, 6])
-df.loc[idx, 'pCFC12'] = np.NaN
+df.loc[idx, 'pCFC12'] = np.nan
 
 
 ## SF6:
@@ -374,27 +375,20 @@ b1 = 0.0293201
 b2 = -0.0351974
 b3 = 0.00740056
 
-df['pSF6'] = np.NaN
+df['pSF6'] = np.nan
 for index, row in df.iterrows():
     T = row['PT'] + 273.15
     S = row['CTD_SALINITY']
-    if S == -999: S = np.NaN
+    if S == -999: S = np.nan
     F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + S*(b1 + b2*(T/100) + b3*(T/100)**2)) # note that a4 term is absent
     df.at[index, 'pSF6'] = round(((row['SF6']/10**15)/F)*10**12, 2) # /10**15: to convert fmol/kg -> mol/kg
 
 idx = ~df['SF6_FLAG_W'].isin([0, 2, 6]) 
-df.loc[idx, 'pSF6'] = np.NaN
-
+df.loc[idx, 'pSF6'] = np.nan
 
 
 # Numbers make sense, they are in the range of what is observed (see e.g. Fine 
 # 2011, figure 1).
-
-# Estimate tracers ratios:
-df['pCFC11pCFC12'] = round(df['pCFC11']/df['pCFC12'], 3)
-df['pSF6pCFC11'] = round(df['pSF6']/df['pCFC11'], 4)
-df['pSF6pCFC12'] = round(df['pSF6']/df['pCFC12'], 4)
-
 
 
 
@@ -403,7 +397,7 @@ df['pSF6pCFC12'] = round(df['pSF6']/df['pCFC12'], 4)
 start_time = dt.datetime.now()
 
 
-# [takes ~ 90 min]
+# [takes ~ 10 min]
 
 #### Atmospheric values are given yearly. We will need to interpolate between 
 # the two closest values.
@@ -494,9 +488,9 @@ fig_n.savefig(fpath, format='svg', bbox_inches='tight', transparent=True)
 
 
 ## Set tracer names to use in loop:
-ptracers = ['pCFC11', 'pCFC12', 'pSF6', 'pCFC11pCFC12', 'pSF6pCFC11', 'pSF6pCFC12']
-ptracers_atm = ['CFC11', 'CFC12', 'SF6', 'CFC11CFC12', 'SF6CFC11', 'SF6CFC12'] # NH/SH/GL suffix to be added within loop
-tr_year_names = ['YEAR_CFC11', 'YEAR_CFC12', 'YEAR_SF6', 'YEAR_CFC11CFC12', 'YEAR_SF6CFC11', 'YEAR_SF6CFC12']
+ptracers = ['pCFC11', 'pCFC12', 'pSF6']
+ptracers_atm = ['CFC11', 'CFC12', 'SF6'] # NH/SH/GL suffix to be added within loop
+tr_year_names = ['YEAR_CFC11', 'YEAR_CFC12', 'YEAR_SF6']
 
 # Preallocate space:
 for i in tr_year_names:
@@ -507,6 +501,7 @@ for i in tr_year_names:
 # We assume that the sample was in equilibrium with the atmosphere, i.e. 100% 
 # saturation, but this is not always exactly true. Consider this uncertainty 
 # when interpreting results.
+cntr = 0
 for idx, ptr in enumerate(ptracers):
     for idx_df, row in df.iterrows():
         
@@ -521,13 +516,8 @@ for idx, ptr in enumerate(ptracers):
         # uncertainty.
         # Consider the proper hemisphere as determined above for each cruise:
         ptracers_atm_h = ptracers_atm[idx] + row['CRUISE_HEMISPHERE']
-        if ptracers_atm[idx] in ['CFC11', 'CFC12', 'SF6']: # for tracer concentrations
-            over0 = np.where(atm_ss[ptracers_atm_h]>0)[0] # where returns a tupple, [0] converts it to ndarray
-            atm_ss = atm_ss.iloc[np.concatenate(((over0[0]-1), over0), axis=None),:]
-        elif ptracers_atm[idx] in ['CFC11CFC12']: # for the CFC-11/CFC-12 ratio
-            atm_ss = atm_ss.loc[atm_ss['Year']>=1948,:]
-        else: # for the SF6/CFC-11 & SF6/CFC-12 ratios
-            atm_ss = atm_ss.loc[atm_ss['Year']>=1975,:]
+        over0 = np.where(atm_ss[ptracers_atm_h]>0)[0] # where returns a tupple, [0] converts it to ndarray
+        atm_ss = atm_ss.iloc[np.concatenate(((over0[0]-1), over0), axis=None),:]
         
         # Get the first and last value in that time range:
         atm_first = atm_ss[ptracers_atm_h].iat[0] # first is needed because we crop the ratio histories, so our sample value might be below the first, and thus we have to set that case as nan
@@ -535,15 +525,16 @@ for idx, ptr in enumerate(ptracers):
         
         if (np.isnan(row[ptr])) | (row[ptr]>=atm_last) | (row[ptr]<=atm_first) | (row[ptr]<=0):
             
+            # There are a few instances in which ages cannot be computed:
+            #
             # For CFC-11|CFC-12 after reaching the atm peak, if the sample 
             # value is equal/higher than the last value, it means that we have 
             # reached that value twice and thus we cannot estimate the age. 
-            # For CFC-11|CFC-12 before reaching the atm peak, or SF6 on the 
-            # other hand if this happens 
-            # it means that either there was an error due to it being too close
-            # to the most recent atm value and the measured value resulted just 
-            # above, or for SF6 the sample is too recent to be compared to
-            # our current atmospheric dataset (reaches 2015).
+            # For CFC-11|CFC-12 before reaching the atm peak, or for SF6,
+            # if this happens it means that either there was an error due to it
+            # being too close to the most recent atm value and the measured 
+            # value resulted just above, or for SF6 the sample is too recent to
+            # be compared to our current atmospheric dataset.
             #
             # In any case, both instances should be assigned as nan.
             # 
@@ -573,7 +564,7 @@ for idx, ptr in enumerate(ptracers):
             lowest_below = diff[diff>=0].nsmallest(1).index[0]
             lowest2 = [lowest_below, lowest_above]
             
-            
+
             # Interpolate to get the date of our exact tracer value:
             tracer_year = np.interp(x=row[ptr],
                                     xp=atm_ss.loc[lowest2, ptracers_atm_h], 
@@ -582,7 +573,25 @@ for idx, ptr in enumerate(ptracers):
                                     right=-999)
             # the left|right out of bound cases should be dealt with in the 
             # previous conditions, but keep track just in case.
-
+            
+            #------------------------------------------------------------------
+            # For CFCs measured after peaking, check if tracer partial pressure 
+            # was not within the GLODAP uncertainty (5%) relative to the 
+            # atmospheric values when sampling (that is, that the value in the 
+            # sample is not within uncertainty of being repeated twice in the 
+            # atmospheric history, and thus unable to be uniquely assigned)
+            # 
+            # Get peak year of tracer
+            ptracers_atm_h_py = atm['Year'].iat[atm[ptracers_atm_h].idxmax()]
+            # If CFC and sample year after peak, check value
+            if (ptr in ['pCFC11', 'pCFC12']) & (YS > ptracers_atm_h_py):
+                # get upper bound of uncertainty for sample, and compare it
+                # to the atmospheric value of that year
+                u_max = row[ptr] + row[ptr] * .05 
+                if u_max >= atm_last:
+                    tracer_year = np.nan
+                    cntr += 1
+            #------------------------------------------------------------------
                 
         ## Store results:
         df.at[idx_df, tr_year_names[idx]] = round(tracer_year, 1)
@@ -604,30 +613,62 @@ print('Duration: {}'.format(end_time - start_time))
 # CFC-12 --------> 1948 - 1990
 # CFC-11/CFC-12 -> 1954 - 1975
 # SF6 -----------> 1980 - PRESENT
-# SF6/CFC-11 ----> 1980 - PRESENT
-# SF6/CFC-12 ----> 1980 - PRESENT
 # 
 df.loc[(df['YEAR_CFC11']<1954) | (df['YEAR_CFC11']>1990), 'YEAR_CFC11'] = np.nan
 df.loc[(df['YEAR_CFC12']<1948) | (df['YEAR_CFC12']>1990), 'YEAR_CFC12'] = np.nan
-df.loc[(df['YEAR_CFC11CFC12']<1954) | (df['YEAR_CFC11CFC12']>1975), 'YEAR_CFC11CFC12'] = np.nan
 df.loc[(df['YEAR_SF6']<1980), 'YEAR_SF6'] = np.nan
-df.loc[(df['YEAR_SF6CFC11']<1980), 'YEAR_SF6CFC11'] = np.nan
-df.loc[(df['YEAR_SF6CFC12']<1980), 'YEAR_SF6CFC12'] = np.nan
-
 
 ## Estimate ages by subtracting the sampling date to the tracer estimate:
 df['AGE_CFC11'] = round(df['YEAR_SAMPLE'], 1) - df['YEAR_CFC11']
 df['AGE_CFC12'] = round(df['YEAR_SAMPLE'], 1) - df['YEAR_CFC12']
-df['AGE_CFC11CFC12'] = round(df['YEAR_SAMPLE'], 1) - df['YEAR_CFC11CFC12']
 df['AGE_SF6'] = round(df['YEAR_SAMPLE'], 1) - df['YEAR_SF6']
-df['AGE_SF6CFC11'] = round(df['YEAR_SAMPLE'], 1) - df['YEAR_SF6CFC11']
-df['AGE_SF6CFC12'] = round(df['YEAR_SAMPLE'], 1) - df['YEAR_SF6CFC12']
 
-# Ages involving SF6 might result in (small) negative values if very close to
-# the sampling date. Make sure to set those to zero:
-df.loc[df['AGE_SF6']<0, 'AGE_SF6'] = 0
-df.loc[df['AGE_SF6CFC11']<0, 'AGE_SF6CFC11'] = 0
-df.loc[df['AGE_SF6CFC12']<0, 'AGE_SF6CFC12'] = 0
+# Add age uncertainties based on Tanhua et al. (2004), Fig. 5.
+def u_cfc11_age(y):
+    if (y >= 1954) & (y <= 1961.5):
+        return 1.5
+    elif (y > 1961.5) & (y <= 1977.5):
+        return 0.9
+    elif (y > 1977.5) & (y <= 1990):
+        return 2.3
+    else:
+        return np.nan
+
+def u_cfc12_age(y):
+    if (y >= 1948) & (y <= 1961.5):
+        return 1.8
+    elif (y > 1961.5) & (y <= 1977.5):
+        return 1.1
+    elif (y > 1977.5) & (y <= 1990):
+        return 2.3
+    else:
+        return np.nan
+    
+def u_sf6_age(y):
+    if (y >= 1980):
+        return 1.5
+    else:
+        return np.nan
+
+df['AGE_CFC11_U'] = [u_cfc11_age(y) for y in df['YEAR_CFC11']]
+df['AGE_CFC12_U'] = [u_cfc12_age(y) for y in df['YEAR_CFC12']]
+df['AGE_SF6_U'] = [u_sf6_age(y) for y in df['YEAR_SF6']]
+
+
+# Make sure that all valid ages have a valid uncertainty, or that if they are nan
+# the uncertainty is also nan
+all((np.isnan(df['AGE_CFC11']) & np.isnan(df['AGE_CFC11_U'])) | 
+    (~np.isnan(df['AGE_CFC11']) & ~np.isnan(df['AGE_CFC11_U'])))
+all((np.isnan(df['AGE_CFC12']) & np.isnan(df['AGE_CFC12_U'])) | 
+    (~np.isnan(df['AGE_CFC12']) & ~np.isnan(df['AGE_CFC12_U'])))
+all((np.isnan(df['AGE_SF6']) & np.isnan(df['AGE_SF6_U'])) | 
+    (~np.isnan(df['AGE_SF6']) & ~np.isnan(df['AGE_SF6_U'])))
+
+# Set to NaN ages smaller than their uncertainty
+df.loc[df['AGE_CFC11'] < df['AGE_CFC11_U'], 'AGE_CFC11'] = np.nan
+df.loc[df['AGE_CFC12'] < df['AGE_CFC12_U'], 'AGE_CFC12'] = np.nan
+df.loc[df['AGE_SF6'] < df['AGE_SF6_U'], 'AGE_SF6'] = np.nan
+
 
 
 #%% EXAMPLE ESTIMATE PLOT
@@ -891,42 +932,6 @@ ax_sca3.text(.05, .82, lb1, size=8, transform=ax_sca3.transAxes)
 fpath = 'figures/hansell_glodap/tracer_ages/tracer_age_comparison_cfc12_sf6.png'
 fig_sca3.savefig(fpath, format='png', bbox_inches='tight', facecolor=None, dpi=300)
 
-
-# SF6/CFC-12 vs SF6:
-fig_sca4, ax_sca4 = plt.subplots(figsize=(10*cm, 10*cm))
-ax_sca4.scatter(x=df['AGE_SF6'],
-                y=df['AGE_SF6CFC12'],
-                facecolors='none', edgecolors='k',
-                s=10, linewidth=.5)
-ax_sca4.axline((0, 0), slope=1, color='#aaa', linestyle='--', linewidth=.8)
-ax_sca4.set(xlim=[0, 50], ylim=[0, 50],
-            xlabel="Age (SF$_6$, years)",
-            ylabel="Age (SF$_6$:CFC-12, years)")
-ax_sca4.set_aspect('equal')
-ax_sca4.set_xticks(range(0,55,5))
-ax_sca4.set_yticks(range(0,55,5))
-ax_sca4.tick_params(direction='in', top=True, right=True, length=3)
-# Add regression line to plot (only in our data range):
-md4 = smf.ols('AGE_SF6CFC12 ~ AGE_SF6', data=df, missing='drop').fit()
-x0 = np.nanmin(df['AGE_SF6'])
-y0 = md4.params['Intercept'] + md4.params['AGE_SF6']*x0
-x1 = np.nanmax(df['AGE_SF6'])
-y1 = md4.params['Intercept'] + md4.params['AGE_SF6']*x1
-ax_sca4.plot([x0, x1], [y0, y1], c='#79c', linewidth=2, alpha=.9)
-slp = str(round(md4.params['AGE_SF6'], 3))
-if md4.pvalues['AGE_SF6']<.001:
-    pval = '$\it{p}$ < 0.001'
-elif md4.pvalues['AGE_SF6']<.05:
-    pval = '$\it{p}$ = ' + str(round(md4.pvalues['AGE_SF6'], 3))
-else:
-    pval = '$\it{ns}$'
-r2 = str(round(md4.rsquared_adj, 2))
-units = 'year$^{-1}$'
-lb1 = "Slope = " + slp + ' ' + units + '\n' + pval + '; R$^2$ = ' + r2
-ax_sca4.text(.05, .82, lb1, size=8, transform=ax_sca4.transAxes)
-
-fpath = 'figures/hansell_glodap/tracer_ages/tracer_age_comparison_sf6cfc12_sf6.png'
-fig_sca4.savefig(fpath, format='png', bbox_inches='tight', facecolor=None, dpi=300)
 
 
 #%% EXPORT RESULTS
