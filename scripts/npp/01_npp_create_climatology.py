@@ -176,6 +176,10 @@ fd = {'fontsize': 11,
 
 #%%% NPP
 
+dpath_out = 'figures/npp/climatology/'
+if not os.path.exists(dpath_out):
+    os.makedirs(dpath_out)
+
 nr = len(npp_mean)
 fig, ax = plt.subplots(nrows=nr, ncols=1, figsize=(15*cm, 7.5*cm*nr),
                        subplot_kw={'projection': mproj})
