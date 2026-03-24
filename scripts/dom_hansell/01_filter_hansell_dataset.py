@@ -24,10 +24,8 @@ import pathlib
 import os
 from shapely import geometry, from_geojson
 import xarray as xr 
-
 import gsw
 import scripts.modules.longhurst as lh
-
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
