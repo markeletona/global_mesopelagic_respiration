@@ -48,10 +48,10 @@ ocean_polys = {}
 for d in dlist:
     
     # Get path to polygon file
-    fpath = [*pathlib.Path(str(d) + "\\ocean").glob("*.geojson")][0]
+    fpath = [*pathlib.Path(d / "ocean").glob("*.geojson")][0]
     
     # Read and store it
-    o = str(d).split("\\")[-1]
+    o = d.name
     ocean_polys[o] = from_geojson(fpath.read_text())
     
 
@@ -62,14 +62,14 @@ wm_polys_plot = {} # load uncut version of polygons too (for mapping)
 wm_depths = ['central', 'intermediate', 'deep']
 for d in dlist:
     
-    o = str(d).split("\\")[-1]
+    o = d.name
     wm_polys[o] = {}
     wm_polys_plot[o] = {}
     
     for z in wm_depths:
         
         # Get wm paths at depth z and ocean d
-        flist = [*pathlib.Path(str(d) + "\\wms\\" + z).glob("*.geojson")]
+        flist = list((d / "wms" / z).glob("*.geojson"))
         
         # Skip iteration if certain depth is absent (i.e. flist is empty)
         # (to skip 'deep' in Indian and Pacific)
@@ -81,7 +81,7 @@ for d in dlist:
             
             # Get wm name (accounts for when the name itself has underscore, 
             # e.g. AAIW_P)            
-            w = "_".join(str(f).split("\\")[-1].split("_")[0:-1])
+            w = "_".join(f.stem.split("_")[:-1])
 
             # Load polygon
             wm_polys[o][z][w] = from_geojson(f.read_text())
@@ -135,7 +135,7 @@ for w in wm_polys_flat: pixel_polys[w] = {}
 for f in flist:
     
     # Read and store it
-    pcode = str(f).split("\\")[-1].replace("_polygon.geojson", "").split(",")
+    pcode = f.stem.replace("_polygon", "").split(",")
     w = pcode[0]
     p = pcode[1]
     pixel_polys[w][p] = from_geojson(f.read_text())
@@ -166,8 +166,8 @@ def lowess_with_confidence_bounds(
     # make sure to reset indexes of x and y so that x[sample], y[sample]
     # work properly (safeguard if provided x,y have already some index)
     smoothed_values = np.empty((N, len(eval_x)))
-    x.reset_index(drop=True, inplace=True)
-    y.reset_index(drop=True, inplace=True)
+    x = x.reset_index(drop=True)
+    y = y.reset_index(drop=True)
     for i in range(N):
         sample = np.random.choice(len(x), len(x), replace=True)
         sampled_x = x[sample]
@@ -588,8 +588,8 @@ for io, o in enumerate(oceans):
             conf_interval=.95,
             lowess_kw={'frac': fr}
             )
-        smo_our[a + '-' + o + '-' + v] = smoothed
-        smo_our_lat[a + '-' + o + '-' + v] = eval_x
+        smo_our[a + '-' + o] = smoothed
+        smo_our_lat[a + '-' + o] = eval_x
         
         # Plot results
         ax_lat[ia, io].scatter(x, y,
@@ -639,8 +639,8 @@ for io, o in enumerate(oceans):
                                 size=7, weight='bold', color='#444',
                                 transform=ax_lat[ia, io].transAxes)
             
-    # Plot background to white
-    ax_lat[ia, io].set_facecolor('w')
+        # Plot background to white
+        ax_lat[ia, io].set_facecolor('w')
 
 # Figure background transparent
 fig_lat.set_facecolor('none')
@@ -729,7 +729,7 @@ for a in ages_res:
             y = rss[v]
             eval_x = np.linspace(np.min(x), np.max(x), 200)
             # Again, exception due to the distribution of data
-            fr = .6 if (v=='DOC') | (a=='AGE_SF6_RES') else .4
+            fr = .6 if (v=='DOC' or a=='AGE_SF6_RES') else .4
             smoothed, bottom, top = lowess_with_confidence_bounds(
                 x, y, eval_x, N=1000,
                 conf_interval=.95,

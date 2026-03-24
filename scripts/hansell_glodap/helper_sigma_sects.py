@@ -46,10 +46,10 @@ ocean_polys = {}
 for d in dlist:
     
     # Get path to polygon file
-    fpath = [*pathlib.Path(str(d) + "\\ocean").glob("*.geojson")][0]
+    fpath = [*pathlib.Path(d / "ocean").glob("*.geojson")][0]
     
     # Read and store it
-    o = str(d).split("\\")[2]
+    o = d.name
     ocean_polys[o] = from_geojson(fpath.read_text())
 
 

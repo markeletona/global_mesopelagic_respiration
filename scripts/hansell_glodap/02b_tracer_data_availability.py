@@ -129,7 +129,7 @@ for b in band_lims:
     
 # Combine all booleans so that the rest of the data can be mapped separately
 idx_bands_list = [value for value in idx_bands.values()]
-idx_bands_all = [any(l) for l in zip(*idx_bands_list)]
+idx_bands_all = np.any(np.column_stack(idx_bands_list), axis=1)
 
 
 # Map the band locations 
@@ -139,15 +139,14 @@ ax_map.add_feature(cfeature.LAND,
                    facecolor='#ccc', 
                    edgecolor='k', linewidth=.3,
                    zorder=1)
-s1 = ax_map.scatter(x=tblu.LONGITUDE.loc[[not i for i in idx_bands_all]],
-                    y=tblu.LATITUDE.loc[[not i for i in idx_bands_all]],
+s1 = ax_map.scatter(x=tblu.loc[~idx_bands_all, 'LONGITUDE'],
+                    y=tblu.loc[~idx_bands_all, 'LATITUDE'],
                     c='#aaa',
                     s=.5,
                     linewidth=.5,
                     transform=ccrs.PlateCarree(),
                     zorder=2)
 for b in idx_bands:
-    idx_bands[b]
     s2 = ax_map.scatter(x=tblu.LONGITUDE.loc[idx_bands[b]],
                         y=tblu.LATITUDE.loc[idx_bands[b]],
                         c=ocean_pal[b],
@@ -168,14 +167,15 @@ ax_map.set_global()
 
 brks_y = [*range(0, 1750, 250)]
 for i, b in enumerate(band_lims):
+    
+    # Get the samples within the band
+    in_band = ((tbl.LATITUDE < band_lims[b][0]) &
+               (tbl.LONGITUDE < band_lims[b][1]) &
+               (tbl.LATITUDE > band_lims[b][2]) &
+               (tbl.LONGITUDE > band_lims[b][3]))
+        
     for j, a in enumerate(ages):
         
-        # Get the samples within the band
-        in_band = ((tbl.LATITUDE < band_lims[b][0]) &
-                   (tbl.LONGITUDE < band_lims[b][1]) &
-                   (tbl.LATITUDE > band_lims[b][2]) &
-                   (tbl.LONGITUDE > band_lims[b][3]))
-                
         # Get the samples with a valid tracer age
         valid_age = ~np.isnan(tbl.loc[in_band, a])
         

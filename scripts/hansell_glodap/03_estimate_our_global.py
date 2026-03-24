@@ -46,7 +46,7 @@ import scripts.modules.RegressConsensus as rc
 # parallel. As it was written in Windows, the main code needs to be 'protected'
 # within if __name__ == '__main__':, otherwise each child process will execute
 # everyting. The code inside the if __name__ == '__main__': block will only be
-# executed once by the parent process. This avoid wasting resources repeating
+# executed once by the parent process. This avoids wasting resources repeating
 # the pre-processing, plots etc. every time a child process is run.
 
 # https://stackoverflow.com/questions/20360686/compulsory-usage-of-if-name-main-in-windows-while-using-multiprocessi
@@ -722,7 +722,7 @@ if __name__ == '__main__':
     # Set number of Monte Carlo simulations
     n_sim = 100 # !!!
     
-    # Set number of cores to use. Leave a core free.
+    # Set number of cores to use. Leave cores free.
     cpus = mp.cpu_count() // 2
     
     print(f"Running Monte Carlo simulations for water mass mixing corrections: {n_sim} sims on {cpus} cores...")
@@ -1120,7 +1120,7 @@ if __name__ == '__main__':
     end_time = dt.datetime.now()
     print("Duration: {}".format(end_time - start_time))
     gc.collect()
-    sys.exit()
+    # sys.exit()
                     
     #%%% Plot regressions
     
@@ -1310,7 +1310,7 @@ if __name__ == '__main__':
                         xmax = +1
                     else:
                         # Set range based on results from all sims
-                        X = np.concat([MC_SIM_WMMC[i].loc[idx, x] for i in range(n_sim)])
+                        X = np.concatenate([MC_SIM_WMMC[i].loc[idx, x] for i in range(n_sim)])
                         xmin = np.nanmin(X)
                         xmax = np.nanmax(X)
                         delta_x = xmax - xmin

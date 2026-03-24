@@ -22,6 +22,7 @@ from pypdf import PdfWriter
 # Get list of files
 dpath = 'figures/hansell_glodap/global/regressions'
 flist = os.listdir(dpath)
+flist = sorted(flist)
 
 # Only include AOU rate regressions
 rate_str = ['_AOU_RES_AGE']

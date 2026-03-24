@@ -185,9 +185,8 @@ nms = [n.upper() for n in nms]
 gv2.columns = nms
 
 # Rename CTD_OXYGEN in hns as the oxygen in GLODAP comes from the bottles and 
-# they do not exactly match* (otherwise it migh be misleading suggesting all
+# they do not exactly match (otherwise it migh be misleading suggesting all
 # comes from the CTD)
-# * see: scripts/glodap/compare_ctd_bottle_oxy_a16n_2003.py
 hns.columns = hns.columns.to_series().replace("CTD_OXYGEN", "OXYGEN",
                                               regex=True)
 
@@ -223,7 +222,7 @@ gv2 = gv2.loc[:, vrs + ['ID2']]
 # Now yes, aggregate to average values at same station~depth.
 # 
 # NOTE:
-# Bad/missing values are a set as NaN, but make sure we do not take a 9 flag
+# Bad/missing values are set as NaN, but make sure we do not take a 9 flag
 # as representative when averaging values (the bad value does not get into
 # the average but if the first flag value in the group is 9 it will be 
 # confusing).
@@ -310,7 +309,7 @@ hns_agg = hns_agg.set_index('ID2')
 gv2_agg.loc[hns_agg_valid_DOC_id_in_gv2_agg, 'DOC'] = hns_agg.loc[hns_agg_valid_DOC_id_in_gv2_agg, 'DOC']
 
 
-# Add samples from hns_agg that are not present in gv2_agg
+# Add samples from hns_agg that are not present in gv2_agg cruises
 idx = ~(hns_agg.EXPOCODE.isin(gv2_agg.EXPOCODE))
 # froga = hns_agg.loc[idx,:]
 merged_tbl = pd.concat([gv2_agg, 

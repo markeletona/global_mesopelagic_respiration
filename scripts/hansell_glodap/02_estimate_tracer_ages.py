@@ -322,16 +322,16 @@ b1 = -0.146531
 b2 = 0.093621
 b3 = -0.0160693
 
-df['pCFC11'] = np.nan # pre-allocate space
-for index, row in df.iterrows():
-    # Get potential temperature and salinity:
-    T = row['PT'] + 273.15
-    S = row['CTD_SALINITY']
-    if S == -999: S = np.nan # few instances have no salinity
-    # Estimate solubility:
-    F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + a4*(T/100)**2 + S*(b1 + b2*(T/100) + b3*(T/100)**2))
-    # Estimate and store partial pressure:
-    df.at[index, 'pCFC11'] = round(((row['CFC_11']/10**12)/F)*10**12, 2) # /10**12: to convert pmol/kg -> mol/kg | *10**12: to convert result to parts per trillion, the usual units
+# Get potential temperature and salinity:
+T = df['PT'] + 273.15 # in K
+S = df['CTD_SALINITY']
+
+# Estimate solubility:
+F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + a4*(T/100)**2 + S*(b1 + b2*(T/100) + b3*(T/100)**2))
+
+# Estimate and store partial pressure:
+df['pCFC11'] = np.round(((df['CFC_11'] / 10**12) / F) * 10**12, 2) # /10**12: to convert pmol/kg -> mol/kg | *10**12: to convert result to parts per trillion, the usual units
+
     
 # Preserve values only if the measurement had a valid flag (set NaN otherwise)
 # (the dataset was filtered to keep samples where either one of the three tracer
@@ -354,14 +354,8 @@ b1 = -0.147718
 b2 = 0.093175
 b3 = -0.0157340
 
-df['pCFC12'] = np.nan
-for index, row in df.iterrows():
-    T = row['PT'] + 273.15
-    S = row['CTD_SALINITY']
-    if S == -999: S = np.nan
-    F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + a4*(T/100)**2 + S*(b1 + b2*(T/100) + b3*(T/100)**2))
-    df.at[index, 'pCFC12'] = round(((row['CFC_12']/10**12)/F)*10**12, 2)
-
+F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + a4*(T/100)**2 + S*(b1 + b2*(T/100) + b3*(T/100)**2))
+df['pCFC12'] = np.round(((df['CFC_12'] / 10**12) / F) * 10**12, 2)
 idx = ~df['CFC_12_FLAG_W'].isin([0, 2, 6])
 df.loc[idx, 'pCFC12'] = np.nan
 
@@ -374,15 +368,8 @@ a3 = 30.6372
 b1 = 0.0293201
 b2 = -0.0351974
 b3 = 0.00740056
-
-df['pSF6'] = np.nan
-for index, row in df.iterrows():
-    T = row['PT'] + 273.15
-    S = row['CTD_SALINITY']
-    if S == -999: S = np.nan
-    F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + S*(b1 + b2*(T/100) + b3*(T/100)**2)) # note that a4 term is absent
-    df.at[index, 'pSF6'] = round(((row['SF6']/10**15)/F)*10**12, 2) # /10**15: to convert fmol/kg -> mol/kg
-
+F = np.exp(a1 + a2*(100/T) + a3*np.log(T/100) + S*(b1 + b2*(T/100) + b3*(T/100)**2)) # note that a4 term is absent
+df['pSF6'] = np.round(((df['SF6'] / 10**15) / F) * 10**12, 2) # /10**15: to convert fmol/kg -> mol/kg
 idx = ~df['SF6_FLAG_W'].isin([0, 2, 6]) 
 df.loc[idx, 'pSF6'] = np.nan
 
@@ -517,7 +504,7 @@ for idx, ptr in enumerate(ptracers):
         # Consider the proper hemisphere as determined above for each cruise:
         ptracers_atm_h = ptracers_atm[idx] + row['CRUISE_HEMISPHERE']
         over0 = np.where(atm_ss[ptracers_atm_h]>0)[0] # where returns a tupple, [0] converts it to ndarray
-        atm_ss = atm_ss.iloc[np.concatenate(((over0[0]-1), over0), axis=None),:]
+        atm_ss = atm_ss.iloc[np.concatenate((over0[0]-1, over0), axis=None),:]
         
         # Get the first and last value in that time range:
         atm_first = atm_ss[ptracers_atm_h].iat[0] # first is needed because we crop the ratio histories, so our sample value might be below the first, and thus we have to set that case as nan
@@ -584,7 +571,7 @@ for idx, ptr in enumerate(ptracers):
             # Get peak year of tracer
             ptracers_atm_h_py = atm['Year'].iat[atm[ptracers_atm_h].idxmax()]
             # If CFC and sample year after peak, check value
-            if (ptr in ['pCFC11', 'pCFC12']) & (YS > ptracers_atm_h_py):
+            if (ptr in ['pCFC11', 'pCFC12']) and (YS > ptracers_atm_h_py):
                 # get upper bound of uncertainty for sample, and compare it
                 # to the atmospheric value of that year
                 u_max = row[ptr] + row[ptr] * .05 

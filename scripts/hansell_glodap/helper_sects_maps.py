@@ -60,10 +60,10 @@ ocean_polys = {}
 for d in dlist:
     
     # Get path to polygon file
-    fpath = [*pathlib.Path(str(d) + "\\ocean").glob("*.geojson")][0]
+    fpath = [*pathlib.Path(d / "ocean").glob("*.geojson")][0]
     
     # Read and store it
-    o = str(d).split("\\")[-1]
+    o = d.name
     ocean_polys[o] = from_geojson(fpath.read_text())
     
 
@@ -74,14 +74,14 @@ wm_polys_plot = {} # load uncut version of polygons too (for plotting)
 wm_depths = ['central', 'intermediate', 'deep']
 for d in dlist:
     
-    o = str(d).split("\\")[-1]
+    o = d.name
     wm_polys[o] = {}
     wm_polys_plot[o] = {}
     
     for z in wm_depths:
         
         # Get wm paths at depth z and ocean d
-        flist = [*pathlib.Path(str(d) + "\\wms\\" + z).glob("*.geojson")]
+        flist = list((d / "wms" / z).glob("*.geojson"))
         
         # Skip iteration if certain depth is absent (i.e. flist is empty)
         if not flist: continue
@@ -92,7 +92,7 @@ for d in dlist:
             
             # Get wm name (accounts for when the name itself has underscore, 
             # e.g. AAIW_P)            
-            w = "_".join(str(f).split("\\")[-1].split("_")[0:-1])
+            w = "_".join(f.stem.split("_")[:-1])
 
             # Load polygon
             wm_polys[o][z][w] = from_geojson(f.read_text())
