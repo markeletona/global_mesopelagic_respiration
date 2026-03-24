@@ -24,10 +24,8 @@ import pathlib
 import os
 from shapely import geometry, from_geojson
 import xarray as xr 
-
 import gsw
 import scripts.modules.longhurst as lh
-
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
@@ -45,7 +43,7 @@ gv2 = pd.read_csv(fpath, sep=',', header=0,
 
 #%% FILTER DATASET
 
-# Lighten the glodap table to retain only the necessary variables.
+# Lighten the glodap table by retaining only the necessary variables.
 vrs = ['G2expocode', 'G2cruise', 'G2station', 
        'G2year', 'G2month', 'G2day',
        'G2latitude', 'G2longitude', 'G2bottle',
@@ -521,11 +519,11 @@ for iw, w in enumerate(wm_polys):
                      linewidth=.2,
                      zorder=0)
     ax_w.add_geometries(wm_polys[w],
-                                facecolor='none',
-                                edgecolor='k',
-                                linewidth=.7,
-                                crs=ccrs.PlateCarree(),
-                                zorder=1)
+                        facecolor='none',
+                        edgecolor='k',
+                        linewidth=.7,
+                        crs=ccrs.PlateCarree(),
+                        zorder=1)
     ax_w.scatter(ss.G2longitude, ss.G2latitude,
                  s=.5,
                  linewidth=.05,
