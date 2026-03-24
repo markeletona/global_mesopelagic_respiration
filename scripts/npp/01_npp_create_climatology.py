@@ -139,7 +139,7 @@ len_lat = npp_mean['cbpm'].shape[0] # cbpm just as reference, all are the same
 len_lon = npp_mean['cbpm'].shape[1]
 
 # Compute grid spacing
-grid_spacing = (90 - (-90))/len_lat
+grid_spacing = (90 - (-90)) / len_lat
 
 # Compute coordinates (center of pixel) following instructions
 lat = [90 - grid_spacing * px - grid_spacing/2 for px in range(len_lat)]
@@ -202,7 +202,7 @@ for i, d in enumerate(npp_mean):
                       zorder=1)
     ax[i].set_global()
     
-fpath = "figures/npp/climatology/npp_climatologies.pdf"
+fpath = 'figures/npp/climatology/npp_climatologies.pdf'
 fig.savefig(fpath, format='pdf', bbox_inches='tight', transparent=False,
             dpi=500)
 
