@@ -12,6 +12,7 @@ of Gómez-Letona & Álvarez-Salgado (2026).
 
 import subprocess
 import sys
+import os
 from datetime import datetime as dt
 
 
@@ -64,8 +65,17 @@ list_of_scripts = [
 
 ## Execute scripts one by one:
 
+# Capture current environment variables
+# And add the root of your project to the PYTHONPATH
+# to ensure the child script can find the 'scripts' folder
+# This allows to run the master script and importantly the childs from the 
+# command line with:
+# python .\scripts\master.py > logs.txt
+env = os.environ.copy()
+env["PYTHONPATH"] = os.getcwd()
 for i in list_of_scripts:
     
-    subprocess.run([sys.executable, i], check=True)
+    subprocess.run([sys.executable, i], check=True, env=env)
     now = dt.now().strftime('%Y-%m-%d %H:%M:%S')
     print("Finished: " + i.split('/')[-1] + " (" + now + ")")
+
