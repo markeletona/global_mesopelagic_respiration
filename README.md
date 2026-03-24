@@ -1,5 +1,5 @@
 # global_mesopelagic_respiration
-Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (under review). Steps:
+Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (2026). Steps:
 
 1. Install the conda environment specified in the `.yml` file (`oceanicu.yml`). Type the following command in the terminal:
    
