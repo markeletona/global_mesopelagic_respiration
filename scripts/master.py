@@ -66,7 +66,7 @@ list_of_scripts = [
 ## Execute scripts one by one:
 
 # Capture current environment variables
-# And add the root of your project to the PYTHONPATH
+# And add the root of the project to the PYTHONPATH
 # to ensure the child script can find the 'scripts' folder
 # This allows to run the master script and importantly the childs from the 
 # command line with:
