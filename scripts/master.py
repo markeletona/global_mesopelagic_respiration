@@ -3,7 +3,7 @@
 Created on Wed Jun 11 14:24:36 2025
 
 A master script that executes all individual scripts to reproduce the results
-of Gómez-Letona & Álvarez-Salgado (XXXX)
+of Gómez-Letona & Álvarez-Salgado (2026).
 
 @author: Markel
 """
@@ -11,6 +11,7 @@ of Gómez-Letona & Álvarez-Salgado (XXXX)
 #%% IMPORTS
 
 import subprocess
+import sys
 from datetime import datetime as dt
 
 
@@ -65,6 +66,6 @@ list_of_scripts = [
 
 for i in list_of_scripts:
     
-    subprocess.call(['python', i])
+    subprocess.run([sys.executable, i], check=True)
     now = dt.now().strftime('%Y-%m-%d %H:%M:%S')
     print("Finished: " + i.split('/')[-1] + " (" + now + ")")
