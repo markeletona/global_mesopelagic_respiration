@@ -173,8 +173,8 @@ def lowess_with_confidence_bounds(
     # make sure to reset indexes of x and y so that x[sample], y[sample]
     # work properly (safeguard if provided x,y have already some index)
     smoothed_values = np.empty((N, len(eval_x)))
-    x.reset_index(drop=True, inplace=True)
-    y.reset_index(drop=True, inplace=True)
+    x = x.reset_index(drop=True)
+    y = y.reset_index(drop=True)
     for i in range(N):
         sample = np.random.choice(len(x), len(x), replace=True)
         sampled_x = x[sample]
@@ -662,7 +662,7 @@ for i in range(len(smoothed_values)):
                alpha=.5,
                zorder=2)
     ax[i].plot(10**smoothed_values[i, :], eval_x, 
-               color=pal_tracers[a], alpha=.8, 
+               color=pal_tracers['AGE_SF6_RES'], alpha=.8, 
                zorder=1)
     
     ax[i].set_xscale('log')
