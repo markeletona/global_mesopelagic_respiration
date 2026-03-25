@@ -15,7 +15,7 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (2026). 
    ```
 2. Before running the project code a very minor edit is required to download POC data, see details in `scripts/download_data/04_download_poc3d.py`.
 3. Set the project folder as the current directory (e.g., `cd MY/PATH/TO/FOLDER/global_mesopelagic_respiration-main`) and run `python scripts/master.py > logs.txt`.
-4. Alternatively, launch the Spyder IDE (type `spyder` in the terminal) and then open the [project](https://docs.spyder-ide.org/current/panes/projects.html) from the the parent directory. Make sure that in `Tools > Preferences > Working directory` the selected option is `The project ...`, and in `Tools > Preferences > Run` within the configuration for the `.py` extension the `Working directory settings` has `The current working directory` selected. Otherwise relative paths won't work. Note: this works for Spyder 6.1, might be different for previous versions. Execute the `master.py` script.
+3b. Alternatively, launch the Spyder IDE (type `spyder` in the terminal) and then open the [project](https://docs.spyder-ide.org/current/panes/projects.html) from the the parent directory. Make sure that in `Tools > Preferences > Working directory` the selected option is `The project ...`, and in `Tools > Preferences > Run` within the configuration for the `.py` extension the `Working directory settings` has `The current working directory` selected. Otherwise relative paths won't work. Note: this works for Spyder 6.1, might be different for previous versions. Execute the `master.py` script.
 
 ### Data availability
 The source data for this work are publicly available:
