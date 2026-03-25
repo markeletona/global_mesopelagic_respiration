@@ -199,7 +199,7 @@ hns.columns = hns.columns.to_series().replace("CTD_OXYGEN", "OXYGEN",
 # variables with no flags
 vrs1 = ['EXPOCODE', 'CRUISE', 'STATION', 'BOTTLE',
         'DATE', 'LATITUDE', 'LONGITUDE',
-        'OCEAN', 'WATER_MASS', 'LP',
+        'OCEAN', 'WATER_MASS',
         'CTD_PRESSURE', 'PT', 'CTD_SALINITY', 'SIGMA0', 'SIGMA1']
 # variables with flags
 vrs2 = ['OXYGEN',
@@ -244,7 +244,6 @@ agg_dict = {'EXPOCODE': lambda x: first(x),
             'LONGITUDE': np.nanmean,
             'OCEAN': lambda x: first(x),
             'WATER_MASS': lambda x: first(x),
-            'LP': lambda x: first(x),
             'CTD_PRESSURE': np.nanmean,
             'PT': np.nanmean,
             'CTD_SALINITY': np.nanmean,
@@ -428,7 +427,7 @@ merged_tbl_f_wm['AOU_U'] = abs(merged_tbl_f_wm['AOU']) * [u_AOU(t) for t in merg
 
 # Reorder columns so that uncertainties are next to their variables
 cols = ['EXPOCODE', 'CRUISE', 'STATION', 'BOTTLE', 'DATE', 'LATITUDE',
-        'LONGITUDE', 'OCEAN', 'WATER_MASS', 'LP', 'CTD_PRESSURE', 'PT', 'PT_U',
+        'LONGITUDE', 'OCEAN', 'WATER_MASS', 'CTD_PRESSURE', 'PT', 'PT_U',
         'CTD_SALINITY', 'CTD_SALINITY_U', 'SIGMA0', 'SIGMA1',
         'OXYGEN', 'OXYGEN_U', 'OXYGEN_FLAG_W', 
         'CFC_11', 'CFC_11_FLAG_W', 'CFC_12', 'CFC_12_FLAG_W', 'SF6', 'SF6_FLAG_W', 
