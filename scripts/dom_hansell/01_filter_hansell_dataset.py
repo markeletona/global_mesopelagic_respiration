@@ -25,7 +25,6 @@ import os
 from shapely import geometry, from_geojson
 import xarray as xr 
 import gsw
-import scripts.modules.longhurst as lh
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
@@ -332,42 +331,6 @@ hns_ss.loc[mw_unadw_overlap, 'WATER_MASS'] = 'MW'
 
 
 
-#%% ADD LONGHURST PROVINCES
-
-###
-### [takes ~ <1 min]
-###
-
-# Finding the Longhurst province to which a sample belongs is quite time costly
-# (relatively). Thus, considering the very high number of samples, it is more
-# efficient to do it once per station and then map the results to all the 
-# samples per station.
-
-# Create a temporary variable to uniquely identify stations across cruises
-hns_ss = hns_ss.assign(STID = lambda x: x['EXPOCODE'] + x['STATION'])
-
-
-# Keep unique instances of stations
-colnames = ['STID', 'LONGITUDE', 'LATITUDE']
-hns_ss2 = hns_ss.loc[~hns_ss.duplicated('STID'), colnames]
-
-
-### Assign stations Longhurst provinces
-
-hns_ss2['LP'] = 'nan'
-for ir, r in hns_ss2.iterrows():
-    hns_ss2.loc[ir, 'LP'] = lh.find_longhurst(r['LONGITUDE'], r['LATITUDE'])
-
-
-### Map results to sample table
-hns_ss = hns_ss.merge(hns_ss2[['STID', 'LP']], on='STID')
-
-
-# Remove temporary variables/column
-hns_ss = hns_ss.drop('STID', axis=1)
-del hns_ss2
-
-
 #%% ASSIGN NPP
 
 # Assign net primary production values to each sample based on its geographic
@@ -652,7 +615,7 @@ fig_w.savefig(fpath, format='pdf', bbox_inches='tight', transparent=True)
 
 # vars with no flags:    
 var_meta = ['EXPOCODE', 'CRUISE', 'STATION', 'CAST', 'BOTTLE', 'BOTTLE_FLAG_W',
-            'DATE', 'LATITUDE', 'LONGITUDE', 'OCEAN', 'WATER_MASS', 'LP',
+            'DATE', 'LATITUDE', 'LONGITUDE', 'OCEAN', 'WATER_MASS',
             'BOTTOM_DEPTH', 'CTD_PRESSURE', 'CTD_TEMPERATURE']
 
 # vars that have flags:
