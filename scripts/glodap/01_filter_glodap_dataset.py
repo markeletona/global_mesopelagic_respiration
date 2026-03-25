@@ -25,7 +25,6 @@ import os
 from shapely import geometry, from_geojson
 import xarray as xr 
 import gsw
-import scripts.modules.longhurst as lh
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
@@ -246,48 +245,6 @@ mw_unadw_overlap = wm_boo['MW'] & wm_boo['UNADW']
 sum(mw_unadw_overlap)
 gv2.loc[mw_unadw_overlap, 'G2watermass'] = 'MW'
 
-
-
-#%% ADD LONGHURST PROVINCES
-
-###
-### [takes ~ 2 min]
-###
-
-# Finding the Longhurst province to which a sample belongs is quite time costly
-# (relatively). Thus, considering the very high number of samples, it is more
-# efficient to do it once per station and then map the results to all the 
-# samples per station.
-
-# Create a temporary variable to uniquely identify stations across cruises
-gv2 = gv2.assign(STID = lambda x: x['G2expocode'] + x['G2station'].astype(str))
-
-
-# Keep unique instances of stations
-colnames = ['STID', 'G2longitude', 'G2latitude']
-gv2_stcoords = gv2.loc[~gv2.duplicated('STID'), colnames]
-
-
-#### Assign stations Longhurst provinces
-gv2_stcoords['G2lp'] = pd.NA
-for ir, r in gv2_stcoords.iterrows():
-    gv2_stcoords.loc[ir, 'G2lp'] = lh.find_longhurst(r['G2longitude'],
-                                                     r['G2latitude'])
-
-
-# Check sample that have not been assigned to any province (e.g. coastal areas)
-# Manually assign them.
-idx = gv2_stcoords['G2lp']=='NOT_IN_PROV'
-gv2_stcoords_not = gv2_stcoords.loc[idx,:]
-
-
-#### Map results to sample table
-gv2 = gv2.merge(gv2_stcoords[['STID', 'G2lp']], on='STID')
-
-
-# Remove temporary variables/column
-gv2 = gv2.drop('STID', axis=1)
-del gv2_stcoords, gv2_stcoords_not
 
 
 #%% ASSIGN NPP
@@ -549,7 +506,7 @@ var_meta = ['G2expocode', 'G2cruise', 'G2station',
             'G2year', 'G2month', 'G2day',
             'G2latitude', 'G2longitude',
             'G2bottle', 'G2pressure',
-            'G2ocean', 'G2watermass', 'G2lp',
+            'G2ocean', 'G2watermass',
             'G2theta', 'G2salinity', 'G2sigma0', 'G2sigma1']
 
 # vars that have flags:
