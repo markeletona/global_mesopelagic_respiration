@@ -1,7 +1,7 @@
 # global_mesopelagic_respiration
 Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (2026). Steps:
 
-1. Install the conda environment specified in the `.yml` file (`oceanicu.yml`). Type the following command in the terminal:
+1. Install the conda environment specified in the `.yml` file (`oceanicu.yml`). Set the project folder as the current directory (e.g., `cd MY/PATH/TO/FOLDER/global_mesopelagic_respiration-main`) and type the following command in the terminal:
    
    ```
    conda env create -f oceanicu.yml
@@ -14,7 +14,7 @@ Code to reproduce the results from Gómez-Letona &amp; Álvarez-Salgado (2026). 
    conda activate oceanicu
    ```
 2. Before running the project code a very minor edit is required to download POC data, see details in `scripts/download_data/04_download_poc3d.py`.
-3. Set the project folder as the current directory (e.g., `cd MY/PATH/TO/FOLDER/global_mesopelagic_respiration-main`) and run:
+3. Run:
    ```
    python scripts/master.py > logs.txt
    ```
