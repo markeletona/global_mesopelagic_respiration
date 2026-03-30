@@ -38,6 +38,9 @@ The results produced in this work are available at:
 -  [OUR estimates for the global mesopelagic ocean](https://doi.org/10.5281/zenodo.15801466).
 -  [Compilation of OURs from previous works](https://doi.org/10.5281/zenodo.15801341).
 
+### Citation
+Gómez‐Letona, M. (2026). Code for: Respiration rates in the global mesopelagic ocean (Version 1.0.0). Zenodo. [https://doi.org/10.5281/zenodo.19222382](https://doi.org/10.5281/zenodo.19222382)
+
 ### Acknowledgments
 This work was funded by the European Union under grant agreement no. 101083922 (OceanICU) and UK Research and Innovation (UKRI) under the UK government’s Horizon Europe funding guarantee [grant number 10054454, 10063673, 10064020, 10059241, 10079684, 10059012, 10048179]. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or European Research Executive Agency. Neither the European Union nor the granting authority can be held responsible for them.
 <br /><img src="https://github.com/markeletona/global_mesopelagic_respiration/blob/main/OceanICU_logo_1.4.png" width="300" height="109" />
